@@ -5,11 +5,15 @@ pub mod prelude {
     #[derive(Debug)]
     pub enum AOCError {
         NoInput,
+        InputParseError,
     }
 
     impl Display for AOCError {
         fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
-            write!(f, "No input")
+            match self {
+                Self::NoInput => write!(f, "No input"),
+                Self::InputParseError => write!(f, "Could not parse input"),
+            }
         }
     }
 
