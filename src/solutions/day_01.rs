@@ -1,9 +1,10 @@
-use anyhow::Result;
+use std::path::Path;
+
 use aoc2021::prelude::*;
 use itertools::Itertools;
 
-fn main() -> Result<()> {
-    let input = parse_input()?;
+pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
+    let input = parse_input(input_path)?;
 
     part_01(&input[..]);
     part_02(&input[..]);
@@ -11,9 +12,9 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn parse_input() -> Result<Vec<usize>> {
-    let input = read_input_lines()?
-        .map(|s| s.parse())
+fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
+    let input = read_input_lines(input_path)?
+        .map(|s| s.parse().map_err(|_| AOCError::ParseError))
         .collect::<Result<Vec<_>, _>>()?;
     Ok(input)
 }

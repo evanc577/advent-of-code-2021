@@ -1,8 +1,17 @@
 use std::fmt;
+use std::path::Path;
 
-use anyhow::Result;
 use aoc2021::prelude::*;
 use itertools::Itertools;
+
+pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
+    let input = parse_input(input_path)?;
+
+    part_01(&input[..]);
+    part_02(&input[..]);
+
+    Ok(())
+}
 
 #[derive(Default)]
 struct Position {
@@ -29,24 +38,15 @@ enum Movement {
     Up(isize),
 }
 
-fn main() -> Result<()> {
-    let input = parse_input()?;
-
-    part_01(&input[..]);
-    part_02(&input[..]);
-
-    Ok(())
-}
-
-fn parse_input() -> Result<Vec<Movement>> {
-    let input = read_input_lines()?
+fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Movement>, AOCError> {
+    let input = read_input_lines(input_path)?
         .map(|s| {
-            let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::InputParseError)?;
+            let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::ParseError)?;
             match (split.0.to_lowercase().as_str(), split.1.parse()) {
                 ("forward", Ok(n)) => Ok(Movement::Forward(n)),
                 ("down", Ok(n)) => Ok(Movement::Down(n)),
                 ("up", Ok(n)) => Ok(Movement::Up(n)),
-                _ => Err(AOCError::InputParseError),
+                _ => Err(AOCError::ParseError),
             }
         })
         .collect::<Result<Vec<_>, _>>()?;

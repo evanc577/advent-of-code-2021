@@ -1,10 +1,12 @@
 [package]
 name = "aoc2021"
+authors = ["Evan Chang <evanc577@gmail.com>"]
+description = "Solutions for Advent of Code 2021 (https://adventofcode.com)"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0"
+clap = "2.34"
 itertools = "0.10"
