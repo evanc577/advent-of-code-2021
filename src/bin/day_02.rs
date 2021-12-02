@@ -41,12 +41,12 @@ fn main() -> Result<()> {
 fn parse_input() -> Result<Vec<Movement>> {
     let input = read_input_lines()?
         .map(|s| {
-            let split: (_, _) = s.split(" ").next_tuple().ok_or(AOCError::InputParseError)?;
+            let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::InputParseError)?;
             match (split.0.to_lowercase().as_str(), split.1.parse()) {
                 ("forward", Ok(n)) => Ok(Movement::Forward(n)),
                 ("down", Ok(n)) => Ok(Movement::Down(n)),
                 ("up", Ok(n)) => Ok(Movement::Up(n)),
-                _ => Err(AOCError::InputParseError).into(),
+                _ => Err(AOCError::InputParseError),
             }
         })
         .collect::<Result<Vec<_>, _>>()?;
