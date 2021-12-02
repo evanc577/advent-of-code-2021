@@ -11,14 +11,14 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn parse_input() -> Result<Vec<u64>> {
+fn parse_input() -> Result<Vec<usize>> {
     let input = read_input_lines()?
-        .map(|s| s.parse::<u64>())
+        .map(|s| s.parse())
         .collect::<Result<Vec<_>, _>>()?;
     Ok(input)
 }
 
-fn part_01(input: &[u64]) {
+fn part_01(input: &[usize]) {
     let inc_count = input
         .iter()
         .tuple_windows::<(_, _)>()
@@ -28,7 +28,7 @@ fn part_01(input: &[u64]) {
     println!("Part 1: {}", inc_count);
 }
 
-fn part_02(input: &[u64]) {
+fn part_02(input: &[usize]) {
     let inc_count = input
         .iter()
         .tuple_windows::<(_, _, _)>()
