@@ -1,4 +1,4 @@
-use std::fmt::{Display, Formatter};
+use std::fmt;
 
 use anyhow::Result;
 use aoc2021::prelude::*;
@@ -11,8 +11,8 @@ struct Position {
     aim: isize,
 }
 
-impl Display for Position {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+impl fmt::Display for Position {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
         write!(
             f,
             "horizontal: {}, depth: {}, multiplied: {}",

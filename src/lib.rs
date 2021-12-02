@@ -1,7 +1,7 @@
 pub mod prelude {
     use std::env;
     use std::error::Error;
-    use std::fmt::{Display, Formatter};
+    use std::fmt;
     use std::fs::File;
     use std::io::{self, BufRead};
 
@@ -13,8 +13,8 @@ pub mod prelude {
         InputParseError,
     }
 
-    impl Display for AOCError {
-        fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+    impl fmt::Display for AOCError {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
             match self {
                 Self::NoInput => write!(f, "No input"),
                 Self::InputParseError => write!(f, "Could not parse input"),
