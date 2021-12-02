@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 use anyhow::Result;
 use aoc2021::prelude::*;
+use itertools::Itertools;
 
 #[derive(Default)]
 struct Position {
@@ -40,19 +41,13 @@ fn main() -> Result<()> {
 fn parse_input() -> Result<Vec<Movement>> {
     let input = read_input_lines()?
         .map(|s| {
-            let split: Vec<_> = s.split(" ").collect();
-            if let [dir, n] = &split[..] {
-                let n = n.parse::<isize>();
-                if let Ok(n) = n {
-                    match dir.to_lowercase().as_str() {
-                        "forward" => return Ok(Movement::Forward(n)),
-                        "down" => return Ok(Movement::Down(n)),
-                        "up" => return Ok(Movement::Up(n)),
-                        _ => return Err(AOCError::InputParseError).into(),
-                    }
-                }
+            let split: (_, _) = s.split(" ").next_tuple().ok_or(AOCError::InputParseError)?;
+            match (split.0.to_lowercase().as_str(), split.1.parse()) {
+                ("forward", Ok(n)) => Ok(Movement::Forward(n)),
+                ("down", Ok(n)) => Ok(Movement::Down(n)),
+                ("up", Ok(n)) => Ok(Movement::Up(n)),
+                _ => Err(AOCError::InputParseError).into(),
             }
-            Err(AOCError::InputParseError).into()
         })
         .collect::<Result<Vec<_>, _>>()?;
     Ok(input)
