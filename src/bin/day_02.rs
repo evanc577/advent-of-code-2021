@@ -1,8 +1,4 @@
-use std::env;
 use std::fmt::{Display, Formatter};
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
 
 use anyhow::Result;
 use aoc2021::prelude::*;
@@ -33,7 +29,7 @@ enum Movement {
 }
 
 fn main() -> Result<()> {
-    let input = read_input(env::args_os().nth(1).ok_or(AOCError::NoInput)?)?;
+    let input = parse_input()?;
 
     part_01(&input[..]);
     part_02(&input[..]);
@@ -41,12 +37,8 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn read_input(path: impl AsRef<Path>) -> Result<Vec<Movement>> {
-    let file = File::open(path)?;
-    let input = io::BufReader::new(file)
-        .lines()
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
+fn parse_input() -> Result<Vec<Movement>> {
+    let input = read_input_lines()?
         .map(|s| {
             let split: Vec<_> = s.split(" ").collect();
             if let [dir, n] = &split[..] {
@@ -67,25 +59,24 @@ fn read_input(path: impl AsRef<Path>) -> Result<Vec<Movement>> {
 }
 
 fn part_01(input: &[Movement]) {
-    let final_pos = input.iter().fold(
-        Default::default(),
-        |mut acc: Position, m| {
+    let final_pos = input
+        .iter()
+        .fold(Default::default(), |mut acc: Position, m| {
             match m {
                 Movement::Forward(n) => acc.horizontal += n,
                 Movement::Down(n) => acc.depth += n,
                 Movement::Up(n) => acc.depth -= n,
             }
             acc
-        },
-    );
+        });
 
     println!("Part 1: {}", final_pos);
 }
 
 fn part_02(input: &[Movement]) {
-    let final_pos = input.iter().fold(
-        Default::default(),
-        |mut acc: Position, m| {
+    let final_pos = input
+        .iter()
+        .fold(Default::default(), |mut acc: Position, m| {
             match m {
                 Movement::Forward(n) => {
                     acc.horizontal += n;
@@ -95,8 +86,7 @@ fn part_02(input: &[Movement]) {
                 Movement::Up(n) => acc.aim -= n,
             }
             acc
-        },
-    );
+        });
 
     println!("Part 2: {}", final_pos);
 }

@@ -1,14 +1,9 @@
-use std::env;
-use std::fs::File;
-use std::io::{self, BufRead};
-use std::path::Path;
-
 use anyhow::Result;
 use aoc2021::prelude::*;
 use itertools::Itertools;
 
 fn main() -> Result<()> {
-    let input = read_input(env::args_os().nth(1).ok_or(AOCError::NoInput)?)?;
+    let input = parse_input()?;
 
     part_01(&input[..]);
     part_02(&input[..]);
@@ -16,12 +11,8 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn read_input(path: impl AsRef<Path>) -> Result<Vec<u64>> {
-    let file = File::open(path)?;
-    let input = io::BufReader::new(file)
-        .lines()
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
+fn parse_input() -> Result<Vec<u64>> {
+    let input = read_input_lines()?
         .map(|s| s.parse::<u64>())
         .collect::<Result<Vec<_>, _>>()?;
     Ok(input)
