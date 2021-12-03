@@ -10,3 +10,4 @@ edition = "2021"
 [dependencies]
 clap = "2.34"
 itertools = "0.10"
+ndarray = "0.15"
