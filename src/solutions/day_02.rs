@@ -13,31 +13,6 @@ pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
     Ok(())
 }
 
-#[derive(Default)]
-struct Position {
-    horizontal: isize,
-    depth: isize,
-    aim: isize,
-}
-
-impl fmt::Display for Position {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(
-            f,
-            "horizontal: {}, depth: {}, multiplied: {}",
-            self.horizontal,
-            self.depth,
-            self.horizontal * self.depth
-        )
-    }
-}
-
-enum Movement {
-    Forward(isize),
-    Down(isize),
-    Up(isize),
-}
-
 fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Movement>, AOCError> {
     let input = read_input_lines(input_path)?
         .map(|s| {
@@ -84,4 +59,29 @@ fn part_02(input: &[Movement]) {
         });
 
     println!("Part 2: {}", final_pos);
+}
+
+#[derive(Default)]
+struct Position {
+    horizontal: isize,
+    depth: isize,
+    aim: isize,
+}
+
+impl fmt::Display for Position {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
+        write!(
+            f,
+            "horizontal: {}, depth: {}, multiplied: {}",
+            self.horizontal,
+            self.depth,
+            self.horizontal * self.depth
+        )
+    }
+}
+
+enum Movement {
+    Forward(isize),
+    Down(isize),
+    Up(isize),
 }
