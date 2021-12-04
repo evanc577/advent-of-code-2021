@@ -1,4 +1,4 @@
-use std::{path::Path, fmt};
+use std::{fmt, path::Path};
 
 use aoc2021::prelude::*;
 use itertools::Itertools;
@@ -6,8 +6,8 @@ use itertools::Itertools;
 pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
     let input = parse_input(input_path)?;
 
-    part_01(input);
-    // part_02(&input);
+    part_01(input.clone());
+    part_02(input);
 
     Ok(())
 }
@@ -58,8 +58,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
 fn part_01(mut input: BingoInput) {
     for n in input.number_order {
         for board in input.boards.iter_mut() {
-            board.mark_cell(n);
-            if board.is_complete() {
+            if board.mark_cell(n) == GameState::Completed {
                 println!("Part 1: {}", board);
                 return;
             }
@@ -68,35 +67,66 @@ fn part_01(mut input: BingoInput) {
     println!("Part 1: No solution");
 }
 
+fn part_02(mut input: BingoInput) {
+    let mut boards_ref: Vec<_> = input
+        .boards
+        .iter_mut()
+        .collect();
+    let mut uncomplete_count = boards_ref.len();
+
+    for n in input.number_order {
+        for board in boards_ref.iter_mut() {
+            if board.state == GameState::Completed {
+                continue;
+            }
+
+            if board.mark_cell(n) == GameState::Completed {
+                uncomplete_count -= 1;
+            }
+
+            if uncomplete_count == 0 {
+                println!("Part 2: {}", board);
+                return;
+            }
+        }
+    }
+    println!("Part 2: No solution");
+}
+
+#[derive(Clone)]
 struct BingoInput {
     boards: Vec<BingoBoard>,
     number_order: Vec<usize>,
 }
 
+#[derive(Clone)]
 struct BingoBoard {
     data: ndarray::Array2<BingoCell>,
     last_value: usize,
+    state: GameState,
 }
 
 impl BingoBoard {
     fn new(board: ndarray::Array2<BingoCell>) -> Self {
-        Self { data: board, last_value: 0 }
+        Self {
+            data: board,
+            last_value: 0,
+            state: GameState::Uncompleted,
+        }
     }
 
-    fn is_complete(&self) -> bool {
-        let rows = self.data.axis_iter(ndarray::Axis(0));
-        let cols = self.data.axis_iter(ndarray::Axis(1));
-        let row_len = self.data.shape()[1];
-        let mut diag_1 = self.data.iter().step_by(row_len + 1);
-        let mut diag_2 = self.data.iter().skip(row_len - 1).step_by(row_len - 1);
-
-        for line in rows.chain(cols) {
-            if line.iter().all(|cell| cell.marked) {
-                return true;
-            }
+    fn is_complete(&self, i: usize, j: usize) -> bool {
+        if self.state == GameState::Completed {
+            return true;
         }
 
-        if diag_1.all(|cell| cell.marked) || diag_2.all(|cell| cell.marked) {
+        let row = self.data.index_axis(ndarray::Axis(0), i);
+        let col = self.data.index_axis(ndarray::Axis(1), j);
+
+        if row.iter().all(|cell| cell.marked) {
+            return true;
+        }
+        if col.iter().all(|cell| cell.marked) {
             return true;
         }
 
@@ -107,14 +137,31 @@ impl BingoBoard {
         self.data
             .iter()
             .filter_map(|cell| if !cell.marked { Some(cell.value) } else { None })
-            .sum::<usize>() * self.last_value
+            .sum::<usize>()
+            * self.last_value
     }
 
-    fn mark_cell(&mut self, value: usize) {
-        if let Some(cell) = self.data.iter_mut().find(|cell| cell.value == value) {
+    fn mark_cell(&mut self, value: usize) -> GameState {
+        if let Some((cell, idx)) = self.data.iter_mut().zip(0..).find(|(cell, _)| cell.value == value) {
             cell.marked = true;
             self.last_value = value;
+
+            let (i, j) = if let [rows, cols] = self.data.shape() {
+                (idx / rows, idx % cols)
+            } else {
+                return self.state;
+            };
+
+            match self.is_complete(i, j) {
+                true => {
+                    self.state = GameState::Completed;
+                    return GameState::Completed;
+                }
+                false => return GameState::Uncompleted,
+            }
         }
+
+        return self.state;
     }
 }
 
@@ -124,8 +171,14 @@ impl fmt::Display for BingoBoard {
     }
 }
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 struct BingoCell {
     value: usize,
     marked: bool,
+}
+
+#[derive(Clone, Copy, PartialEq)]
+enum GameState {
+    Completed,
+    Uncompleted,
 }
