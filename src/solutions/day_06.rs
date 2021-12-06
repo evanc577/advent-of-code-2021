@@ -1,7 +1,6 @@
 use std::{path::Path, collections::HashMap};
 
 use aoc2021::prelude::*;
-use itertools::Itertools;
 
 pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
     let input = parse_input(input_path)?;
@@ -23,26 +22,14 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
 }
 
 fn part_01(input: &[usize]) {
-    let mut fish: Vec<_> = input.iter().cloned().collect();
-
-    for _ in 0..80 {
-        let mut new_fish = vec![];
-        for f in fish.iter_mut() {
-            if *f == 0 {
-                *f = 6;
-                new_fish.push(8);
-            } else {
-                *f -= 1;
-            }
-        }
-        fish.append(&mut new_fish);
-    }
-
-    let num_fish = fish.len();
-    println!("Part 1: {}", num_fish);
+    println!("Part 1: {}", simulate(input, 80));
 }
 
 fn part_02(input: &[usize]) {
+    println!("Part 2: {}", simulate(input, 256));
+}
+
+fn simulate(input: &[usize], num_days: usize) -> usize {
     let mut fish: HashMap<usize, usize> = HashMap::new();
     for &x in input {
         if let Some(n) = fish.get_mut(&x) {
@@ -52,7 +39,7 @@ fn part_02(input: &[usize]) {
         }
     }
 
-    for _ in 0..256 {
+    for _ in 0..num_days {
         let new_fish = *fish.get(&0).unwrap_or(&0);
 
         // Decrease all fish timers by 1
@@ -67,6 +54,5 @@ fn part_02(input: &[usize]) {
         fish.insert(6, fish.get(&6).unwrap_or(&0) + new_fish);
     }
 
-    let num_fish = fish.iter().fold(0, |acc, (_, x)| acc + x);
-    println!("Part 2: {}", num_fish);
+    fish.iter().fold(0, |acc, (_, x)| acc + x)
 }
