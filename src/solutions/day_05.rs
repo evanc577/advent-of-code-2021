@@ -48,45 +48,37 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Line>, AOCError> {
 }
 
 fn part_01(input: &[Line]) {
-    let mut grid: HashMap<Point, usize> = HashMap::new();
-    for line in input {
-        for point in line.intermediate_points(false) {
-            match grid.get_mut(&point) {
-                Some(p) => *p += 1,
-                None => {
-                    grid.insert(point, 1);
-                    ()
-                }
-            }
-        }
-    }
-
-    let overlaps = grid
-        .iter()
-        .fold(0, |acc, (_, v)| if *v > 1 { acc + 1 } else { acc });
-
-    println!("Part 1: {}", overlaps);
+    let grid = Grid::with_lines(input, AllowDiagonals::No);
+    println!("Part 1: {}", grid.overlaps());
 }
 
 fn part_02(input: &[Line]) {
-    let mut grid: HashMap<Point, usize> = HashMap::new();
-    for line in input {
-        for point in line.intermediate_points(true) {
-            match grid.get_mut(&point) {
-                Some(p) => *p += 1,
-                None => {
-                    grid.insert(point, 1);
-                    ()
-                }
-            }
+    let grid = Grid::with_lines(input, AllowDiagonals::Yes);
+    println!("Part 2: {}", grid.overlaps());
+}
+
+struct Grid(HashMap<Point, usize>);
+
+impl Grid {
+    fn with_lines(lines: &[Line], diagonals: AllowDiagonals) -> Self {
+        let mut grid = Self(HashMap::new());
+        for line in lines {
+            grid.add_line(line, diagonals);
+        }
+        grid
+    }
+
+    fn add_line(&mut self, line: &Line, diagonals: AllowDiagonals) {
+        for point in line.intermediate_points(diagonals) {
+            self.0.entry(point).and_modify(|v| *v += 1).or_insert(1);
         }
     }
 
-    let overlaps = grid
-        .iter()
-        .fold(0, |acc, (_, v)| if *v > 1 { acc + 1 } else { acc });
-
-    println!("Part 2: {}", overlaps);
+    fn overlaps(&self) -> usize {
+        self.0
+            .iter()
+            .fold(0, |acc, (_, v)| if *v > 1 { acc + 1 } else { acc })
+    }
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
@@ -96,7 +88,7 @@ struct Line {
 }
 
 impl Line {
-    fn intermediate_points(&self, diagonal_lines: bool) -> Vec<Point> {
+    fn intermediate_points(&self, diagonal_lines: AllowDiagonals) -> Vec<Point> {
         match self.axis() {
             LineAxis::Other => return vec![],
             LineAxis::Horizontal => {
@@ -116,7 +108,7 @@ impl Line {
                     .collect()
             }
             LineAxis::DiagonalFalling => {
-                if !diagonal_lines {
+                if diagonal_lines == AllowDiagonals::No {
                     return vec![];
                 }
                 let start_x = self.p1.x.min(self.p2.x);
@@ -131,7 +123,7 @@ impl Line {
                     .collect()
             }
             LineAxis::DiagonalRising => {
-                if !diagonal_lines {
+                if diagonal_lines == AllowDiagonals::No {
                     return vec![];
                 }
                 let start_x = self.p1.x.min(self.p2.x);
@@ -175,4 +167,10 @@ enum LineAxis {
 struct Point {
     x: isize,
     y: isize,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum AllowDiagonals {
+    No,
+    Yes,
 }
