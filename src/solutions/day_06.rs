@@ -1,4 +1,4 @@
-use std::{path::Path, collections::HashMap};
+use std::path::Path;
 
 use aoc2021::prelude::*;
 
@@ -30,29 +30,24 @@ fn part_02(input: &[usize]) {
 }
 
 fn simulate(input: &[usize], num_days: usize) -> usize {
-    let mut fish: HashMap<usize, usize> = HashMap::new();
+    const NEW_FISH_TIMER: usize = 8;
+    const RESET_FISH_TIMER: usize = 6;
+
+    let mut fish: Vec<usize> = vec![0; NEW_FISH_TIMER + 1];
     for &x in input {
-        if let Some(n) = fish.get_mut(&x) {
-            *n += 1;
-        } else {
-            fish.insert(x, 1);
-        }
+        fish[x] += 1;
     }
 
     for _ in 0..num_days {
-        let new_fish = *fish.get(&0).unwrap_or(&0);
+        let num_new_fish = fish[0];
 
         // Decrease all fish timers by 1
-        for x in 1..=8 {
-            fish.insert(x - 1, *fish.get(&x).unwrap_or(&0));
-        }
+        fish.rotate_left(1);
 
-        // Add new fish with 8 day timers
-        fish.insert(8, new_fish);
-
-        // Reset fish with 0 day timers to 6 day timers
-        fish.insert(6, fish.get(&6).unwrap_or(&0) + new_fish);
+        // Add new fish
+        fish[NEW_FISH_TIMER] = num_new_fish;
+        fish[RESET_FISH_TIMER] += num_new_fish
     }
 
-    fish.iter().fold(0, |acc, (_, x)| acc + x)
+    fish.iter().sum()
 }
