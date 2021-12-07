@@ -12,7 +12,7 @@ fn main() {
     }
 }
 
-fn run() -> Result<(), AOCError>{
+fn run() -> Result<(), AOCError> {
     let matches = App::new(env!("CARGO_PKG_NAME"))
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
@@ -41,4 +41,3 @@ fn run() -> Result<(), AOCError>{
 
     solutions::dispatch(day, matches.value_of_os("input").unwrap())
 }
-

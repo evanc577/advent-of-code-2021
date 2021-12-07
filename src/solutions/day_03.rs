@@ -37,26 +37,35 @@ fn part_01(input: &ndarray::Array2<Bit>) {
         })
         .collect();
     let epsilon = !gamma.clone();
-    let rate = Output { first: gamma, second: epsilon };
+    let rate = Output {
+        first: gamma,
+        second: epsilon,
+    };
 
     println!("Part 1: {}", rate)
 }
 
 fn part_02(input: &ndarray::Array2<Bit>) {
-    let o2 = part_02_helper(input.clone(), Box::new(|zeros, ones| { ones >= zeros }));
-    let co2 = part_02_helper(input.clone(), Box::new(|zeros, ones| { zeros > ones}));
-    let rating = Output { first: o2, second: co2 };
+    let o2 = part_02_helper(input.clone(), &|zeros, ones| ones >= zeros);
+    let co2 = part_02_helper(input.clone(), &|zeros, ones| zeros > ones);
+    let rating = Output {
+        first: o2,
+        second: co2,
+    };
 
     println!("Part 2: {}", rating);
 }
 
-fn part_02_helper(mut input: ndarray::Array2<Bit>, pred: Box<dyn Fn(usize, usize) -> bool>) -> BinaryNumber {
+fn part_02_helper(
+    mut input: ndarray::Array2<Bit>,
+    pred: &dyn Fn(usize, usize) -> bool,
+) -> BinaryNumber {
     for j in 0..input.shape()[1] {
         let col = input.index_axis(ndarray::Axis(1), j);
         let zeros = col.iter().filter(|&&v| v == Bit::Zero).count();
         let ones = col.len() - zeros;
 
-        let remove_pred = if pred(zeros, ones){
+        let remove_pred = if pred(zeros, ones) {
             |v: Bit| v != Bit::One
         } else {
             |v: Bit| v != Bit::Zero
@@ -79,7 +88,8 @@ fn part_02_helper(mut input: ndarray::Array2<Bit>, pred: Box<dyn Fn(usize, usize
 
     input
         .index_axis(ndarray::Axis(0), 0)
-        .iter().copied()
+        .iter()
+        .copied()
         .collect()
 }
 

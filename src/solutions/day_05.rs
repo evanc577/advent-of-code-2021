@@ -92,7 +92,7 @@ impl Line {
     fn intermediate_points(&self, diagonal: AllowDiagonals) -> Vec<Point> {
         let vector = self.to_vector();
         if vector.x != 0 && vector.y != 0 && vector.x.abs() != vector.y.abs() {
-            return vec![]
+            return vec![];
         }
 
         let step_x = sign(vector.x);
@@ -104,11 +104,11 @@ impl Line {
         }
 
         (0..vector.num_intermediate_points())
-             .map(|offset| Point {
-                 x: self.p1.x + step_x * offset,
-                 y: self.p1.y + step_y * offset,
-             })
-             .collect()
+            .map(|offset| Point {
+                x: self.p1.x + step_x * offset,
+                y: self.p1.y + step_y * offset,
+            })
+            .collect()
     }
 
     fn to_vector(&self) -> Point {

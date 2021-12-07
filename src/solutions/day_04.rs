@@ -20,7 +20,10 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
         .next()
         .ok_or(AOCError::ParseError)?
         .split(',')
-        .map(|c| c.parse::<usize>().map_err(|e| AOCError::ParseIntError(e, c.into())))
+        .map(|c| {
+            c.parse::<usize>()
+                .map_err(|e| AOCError::ParseIntError(e, c.into()))
+        })
         .collect::<Result<_, _>>()?;
 
     // Parse boards
@@ -39,7 +42,9 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
                     .enumerate()
                 {
                     board[[i, j]] = BingoCell {
-                        value: value_str.parse().map_err(|e| AOCError::ParseIntError(e, value_str.into()))?,
+                        value: value_str
+                            .parse()
+                            .map_err(|e| AOCError::ParseIntError(e, value_str.into()))?,
                         marked: false,
                     }
                 }
@@ -68,10 +73,7 @@ fn part_01(mut input: BingoInput) {
 }
 
 fn part_02(mut input: BingoInput) {
-    let mut boards_ref: Vec<_> = input
-        .boards
-        .iter_mut()
-        .collect();
+    let mut boards_ref: Vec<_> = input.boards.iter_mut().collect();
     let mut uncomplete_count = boards_ref.len();
 
     for n in input.number_order {
@@ -142,7 +144,12 @@ impl BingoBoard {
     }
 
     fn mark_cell(&mut self, value: usize) -> GameState {
-        if let Some((cell, idx)) = self.data.iter_mut().zip(0..).find(|(cell, _)| cell.value == value) {
+        if let Some((cell, idx)) = self
+            .data
+            .iter_mut()
+            .zip(0..)
+            .find(|(cell, _)| cell.value == value)
+        {
             cell.marked = true;
             self.last_value = value;
 
