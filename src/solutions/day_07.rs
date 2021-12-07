@@ -35,7 +35,6 @@ fn calculate(input: &[usize], f: fn(usize, usize) -> usize) -> usize {
     let max = *input.iter().max().unwrap_or(&0);
     let min = *input.iter().min().unwrap_or(&0);
     let fuel = (min..=max)
-        .into_iter()
         .map(|l| input.iter().fold(0, |acc, x| acc + f(l, *x)))
         .min()
         .unwrap_or(0);

@@ -102,7 +102,7 @@ impl Line {
             return vec![];
         }
 
-        (0..vector.num_intermediate_points()).into_iter()
+        (0..vector.num_intermediate_points())
              .map(|offset| Point {
                  x: self.p1.x + step_x * offset,
                  y: self.p1.y + step_y * offset,
