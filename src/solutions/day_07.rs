@@ -22,16 +22,16 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
 }
 
 fn part_01(input: &[usize]) {
-    let fuel = calculate(input, |a, b| abs_diff(a, b));
+    let fuel = calculate(input, &|a, b| abs_diff(a, b));
     println!("Part 1: {}", fuel);
 }
 
 fn part_02(input: &[usize]) {
-    let fuel = calculate(input, |a, b| triangular(abs_diff(a, b)));
+    let fuel = calculate(input, &|a, b| triangular(abs_diff(a, b)));
     println!("Part 2: {}", fuel);
 }
 
-fn calculate(input: &[usize], f: fn(usize, usize) -> usize) -> usize {
+fn calculate(input: &[usize], f: &dyn Fn(usize, usize) -> usize) -> usize {
     let max = *input.iter().max().unwrap_or(&0);
     let min = *input.iter().min().unwrap_or(&0);
     let fuel = (min..=max)
