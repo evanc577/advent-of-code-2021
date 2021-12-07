@@ -14,7 +14,7 @@ pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
 
 fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
     let input = read_input_lines(input_path)?
-        .map(|s| s.parse().map_err(|_| AOCError::ParseError))
+        .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s)))
         .collect::<Result<Vec<_>, _>>()?;
     Ok(input)
 }

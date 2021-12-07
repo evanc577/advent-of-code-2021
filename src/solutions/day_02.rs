@@ -21,6 +21,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Movement>, AOCError> 
                 ("forward", Ok(n)) => Ok(Movement::Forward(n)),
                 ("down", Ok(n)) => Ok(Movement::Down(n)),
                 ("up", Ok(n)) => Ok(Movement::Up(n)),
+                (s, Err(e)) => Err(AOCError::ParseIntError(e, s.into())),
                 _ => Err(AOCError::ParseError),
             }
         })

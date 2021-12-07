@@ -20,7 +20,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
         .next()
         .ok_or(AOCError::ParseError)?
         .split(',')
-        .map(|c| c.parse::<usize>().map_err(|_| AOCError::ParseError))
+        .map(|c| c.parse::<usize>().map_err(|e| AOCError::ParseIntError(e, c.into())))
         .collect::<Result<Vec<_>, AOCError>>()?;
 
     // Parse boards
@@ -39,7 +39,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
                     .enumerate()
                 {
                     board[[i, j]] = BingoCell {
-                        value: value_str.parse().map_err(|_| AOCError::ParseError)?,
+                        value: value_str.parse().map_err(|e| AOCError::ParseIntError(e, value_str.into()))?,
                         marked: false,
                     }
                 }

@@ -16,7 +16,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
         .next()
         .ok_or(AOCError::ParseError)?
         .split(',')
-        .map(|s| s.parse().map_err(|_| AOCError::ParseError))
+        .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s.into())))
         .collect::<Result<Vec<_>, AOCError>>()?;
     Ok(input)
 }
