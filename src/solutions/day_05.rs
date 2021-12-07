@@ -81,7 +81,7 @@ impl Grid {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
+#[derive(Clone, Debug)]
 struct Line {
     p1: Point,
     p2: Point,
@@ -104,14 +104,14 @@ impl Line {
 
         (0..vector.num_intermediate_points()).into_iter()
              .map(|offset| Point {
-                 x: self.p1.x - step_x * offset,
-                 y: self.p1.y - step_y * offset,
+                 x: self.p1.x + step_x * offset,
+                 y: self.p1.y + step_y * offset,
              })
              .collect()
     }
 
     fn to_vector(&self) -> Point {
-        self.p1 - self.p2
+        self.p2 - self.p1
     }
 }
 
