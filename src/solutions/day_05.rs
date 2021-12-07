@@ -88,79 +88,31 @@ struct Line {
 }
 
 impl Line {
-    fn intermediate_points(&self, diagonal_lines: AllowDiagonals) -> Vec<Point> {
-        match self.axis() {
-            LineAxis::Other => return vec![],
-            LineAxis::Horizontal => {
-                let start = self.p1.x.min(self.p2.x);
-                let end = self.p1.x.max(self.p2.x);
-                (start..=end)
-                    .into_iter()
-                    .map(|x| Point { x, y: self.p1.y })
-                    .collect()
-            }
-            LineAxis::Vertical => {
-                let start = self.p1.y.min(self.p2.y);
-                let end = self.p1.y.max(self.p2.y);
-                (start..=end)
-                    .into_iter()
-                    .map(|y| Point { x: self.p1.x, y })
-                    .collect()
-            }
-            LineAxis::DiagonalFalling => {
-                if diagonal_lines == AllowDiagonals::No {
-                    return vec![];
-                }
-                let start_x = self.p1.x.min(self.p2.x);
-                let end_x = self.p1.x.max(self.p2.x);
-                let start_y = self.p1.y.min(self.p2.y);
-                (0..=(end_x - start_x))
-                    .into_iter()
-                    .map(|offset| Point {
-                        x: start_x + offset,
-                        y: start_y + offset,
-                    })
-                    .collect()
-            }
-            LineAxis::DiagonalRising => {
-                if diagonal_lines == AllowDiagonals::No {
-                    return vec![];
-                }
-                let start_x = self.p1.x.min(self.p2.x);
-                let end_x = self.p1.x.max(self.p2.x);
-                let start_y = self.p1.y.max(self.p2.y);
-                (0..=(end_x - start_x))
-                    .into_iter()
-                    .map(|offset| Point {
-                        x: start_x + offset,
-                        y: start_y - offset,
-                    })
-                    .collect()
-            }
+    fn intermediate_points(&self, diagonal: AllowDiagonals) -> Vec<Point> {
+        let vector = self.to_vector();
+        if vector.x != 0 && vector.y != 0 && vector.x.abs() != vector.y.abs() {
+            return vec![]
         }
+
+        let step_x = sign(vector.x);
+        let step_y = sign(vector.y);
+
+        // Diagonal line
+        if diagonal == AllowDiagonals::No && step_x * step_y != 0 {
+            return vec![];
+        }
+
+        (0..vector.num_intermediate_points()).into_iter()
+             .map(|offset| Point {
+                 x: self.p1.x - step_x * offset,
+                 y: self.p1.y - step_y * offset,
+             })
+             .collect()
     }
 
-    fn axis(&self) -> LineAxis {
-        if self.p1.x == self.p2.x {
-            LineAxis::Vertical
-        } else if self.p1.y == self.p2.y {
-            LineAxis::Horizontal
-        } else if self.p1.x - self.p2.x == self.p1.y - self.p2.y {
-            LineAxis::DiagonalFalling
-        } else if self.p1.x - self.p2.x == -1 * (self.p1.y - self.p2.y) {
-            LineAxis::DiagonalRising
-        } else {
-            LineAxis::Other
-        }
+    fn to_vector(&self) -> Point {
+        self.p1 - self.p2
     }
-}
-
-enum LineAxis {
-    Horizontal,
-    Vertical,
-    DiagonalFalling,
-    DiagonalRising,
-    Other,
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
@@ -169,8 +121,33 @@ struct Point {
     y: isize,
 }
 
+impl Point {
+    fn num_intermediate_points(&self) -> isize {
+        self.x.abs().max(self.y.abs()) + 1
+    }
+}
+
+impl std::ops::Sub for Point {
+    type Output = Point;
+
+    fn sub(self, rhs: Self) -> Self::Output {
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum AllowDiagonals {
     No,
     Yes,
+}
+
+fn sign(n: isize) -> isize {
+    match n {
+        n if n > 0 => 1,
+        0 => 0,
+        _ => -1,
+    }
 }
