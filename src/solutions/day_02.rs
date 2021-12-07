@@ -25,7 +25,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Movement>, AOCError> 
                 _ => Err(AOCError::ParseError),
             }
         })
-        .collect::<Result<Vec<_>, _>>()?;
+        .collect::<Result<_, _>>()?;
     Ok(input)
 }
 

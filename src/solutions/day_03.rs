@@ -79,8 +79,7 @@ fn part_02_helper(mut input: ndarray::Array2<Bit>, pred: Box<dyn Fn(usize, usize
 
     input
         .index_axis(ndarray::Axis(0), 0)
-        .iter()
-        .map(|v| *v)
+        .iter().copied()
         .collect()
 }
 

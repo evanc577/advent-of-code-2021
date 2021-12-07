@@ -13,6 +13,7 @@ pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
     Ok(())
 }
 
+#[allow(clippy::match_ref_pats)]
 fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Line>, AOCError> {
     let input: Vec<_> = read_input_lines(input_path)?
         .filter_map(|line_str| {

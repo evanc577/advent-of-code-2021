@@ -17,7 +17,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
         .ok_or(AOCError::ParseError)?
         .split(',')
         .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s.into())))
-        .collect::<Result<Vec<_>, AOCError>>()?;
+        .collect::<Result<_, _>>()?;
     Ok(input)
 }
 
@@ -34,11 +34,11 @@ fn part_02(input: &[usize]) {
 fn calculate(input: &[usize], f: &dyn Fn(usize, usize) -> usize) -> usize {
     let max = *input.iter().max().unwrap_or(&0);
     let min = *input.iter().min().unwrap_or(&0);
-    let fuel = (min..=max)
+
+    (min..=max)
         .map(|l| input.iter().fold(0, |acc, x| acc + f(l, *x)))
         .min()
-        .unwrap_or(0);
-    fuel
+        .unwrap_or(0)
 }
 
 fn abs_diff(a: usize, b: usize) -> usize {

@@ -21,7 +21,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
         .ok_or(AOCError::ParseError)?
         .split(',')
         .map(|c| c.parse::<usize>().map_err(|e| AOCError::ParseIntError(e, c.into())))
-        .collect::<Result<Vec<_>, AOCError>>()?;
+        .collect::<Result<_, _>>()?;
 
     // Parse boards
     let boards = input_iter
@@ -47,7 +47,7 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
 
             Ok(BingoBoard::new(board))
         })
-        .collect::<Result<Vec<_>, AOCError>>()?;
+        .collect::<Result<_, _>>()?;
 
     Ok(BingoInput {
         boards,
@@ -161,7 +161,7 @@ impl BingoBoard {
             }
         }
 
-        return self.state;
+        self.state
     }
 }
 

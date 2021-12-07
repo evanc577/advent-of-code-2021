@@ -37,10 +37,10 @@ pub mod prelude {
     pub fn read_input_lines(
         path: impl AsRef<Path>,
     ) -> Result<impl Iterator<Item = String>, AOCError> {
-        let file = File::open(path).map_err(|e| AOCError::BadInputFile(e))?;
+        let file = File::open(path).map_err(AOCError::BadInputFile)?;
         let lines = io::BufReader::new(file)
             .lines()
-            .map(|l| l.map_err(|e| AOCError::BadInputFile(e)))
+            .map(|l| l.map_err(AOCError::BadInputFile))
             .collect::<Result<Vec<_>, _>>()?
             .into_iter();
         Ok(lines)
