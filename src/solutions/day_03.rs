@@ -1,4 +1,5 @@
-use std::{fmt, path::Path};
+use std::fmt;
+use std::path::Path;
 
 use aoc2021::prelude::*;
 

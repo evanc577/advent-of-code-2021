@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-
 use std::path::Path;
 
 use aoc2021::prelude::*;
