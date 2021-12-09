@@ -1,13 +1,14 @@
 use std::path::Path;
 
 use aoc2021::prelude::*;
+use itertools::Itertools;
 use ndarray::Array2;
 
 pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
     let input = parse_input(input_path)?;
 
     part_01(&input);
-    // part_02(&input);
+    part_02(&input);
 
     Ok(())
 }
@@ -34,7 +35,15 @@ fn part_01(input: &Array2<usize>) {
 }
 
 fn part_02(input: &Array2<usize>) {
-    todo!()
+    let low_points = low_points(input);
+    let largest_basins: usize = low_points
+        .iter()
+        .map(|point| basin_size(input, *point))
+        .sorted()
+        .rev()
+        .take(3)
+        .product();
+    println!("Part 2: {}", largest_basins);
 }
 
 fn low_points(input: &Array2<usize>) -> Vec<(usize, usize)> {
@@ -56,4 +65,34 @@ fn low_points(input: &Array2<usize>) -> Vec<(usize, usize)> {
         })
         .collect();
     low_points
+}
+
+fn basin_size(input: &Array2<usize>, point: (usize, usize)) -> usize {
+    // DFS
+    let mut stack = vec![point];
+    let mut visited = Array2::<bool>::default(input.dim());
+    let mut count = 0;
+    while let Some((i, j)) = stack.pop() {
+        if !visited[[i, j]] {
+            visited[[i, j]] = true;
+            count += 1;
+            // Up
+            if i > 1 && input[[i - 1, j]] < 9 {
+                stack.push((i - 1, j));
+            }
+            // Left
+            if j > 1 && input[[i, j - 1]] < 9 {
+                stack.push((i, j - 1));
+            }
+            // Down
+            if i < input.nrows() - 1 && input[[i + 1, j]] < 9 {
+                stack.push((i + 1, j));
+            }
+            // Right
+            if j < input.ncols() - 1 && input[[i, j + 1]] < 9 {
+                stack.push((i, j + 1));
+            }
+        }
+    }
+    count
 }
