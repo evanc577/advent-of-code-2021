@@ -7,7 +7,7 @@ pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
     let input = parse_input(input_path)?;
 
     part_01(&input);
-    // part_02(&input[..]);
+    // part_02(&input);
 
     Ok(())
 }
@@ -26,27 +26,34 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Array2<usize>, AOCError> 
 }
 
 fn part_01(input: &Array2<usize>) {
-    let sum: usize = input
+    let sum: usize = low_points(input)
+        .iter()
+        .map(|(i, j)| input[[*i, *j]] + 1)
+        .sum();
+    println!("Part 1: {}", sum);
+}
+
+fn part_02(input: &Array2<usize>) {
+    todo!()
+}
+
+fn low_points(input: &Array2<usize>) -> Vec<(usize, usize)> {
+    let low_points: Vec<_> = input
         .windows([3, 3])
         .into_iter()
-        .filter_map(|window| {
-            let mut min = window[[0, 0]];
-            for (i, row) in window.rows().into_iter().enumerate() {
-                for (j, value) in row.into_iter().enumerate() {
-                    if i == 1 && j == 1 {
-                        continue;
-                    }
-                    min = min.min(*value);
-                }
-            }
+        .enumerate()
+        .filter_map(|(i, window)| {
+            let min = window[[0, 1]]
+                .min(window[[1, 0]])
+                .min(window[[2, 1]])
+                .min(window[[1, 2]]);
             let center = window[[1, 1]];
             if center < min {
-                Some(center + 1)
+                Some((i / (input.ncols() - 2) + 1, i % (input.ncols() - 2) + 1))
             } else {
                 None
             }
         })
-        .sum();
-
-    println!("Part 1: {}", sum);
+        .collect();
+    low_points
 }
