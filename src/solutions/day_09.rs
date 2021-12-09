@@ -1,7 +1,6 @@
 use std::path::Path;
 
 use aoc2021::prelude::*;
-use itertools::Itertools;
 use ndarray::Array2;
 
 pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
@@ -35,15 +34,13 @@ fn part_01(input: &Array2<usize>) {
 }
 
 fn part_02(input: &Array2<usize>) {
-    let low_points = low_points(input);
-    let largest_basins: usize = low_points
+    let mut basins: Vec<_> = low_points(input)
         .iter()
         .map(|point| basin_size(input, *point))
-        .sorted()
-        .rev()
-        .take(3)
-        .product();
-    println!("Part 2: {}", largest_basins);
+        .collect();
+    basins[..].select_nth_unstable_by(3, |a, b| b.cmp(a)); // reverse sort
+    let product: usize = basins.iter().take(3).product();
+    println!("Part 2: {}", product);
 }
 
 fn low_points(input: &Array2<usize>) -> Vec<(usize, usize)> {
