@@ -18,27 +18,14 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Vec<Character>>, AOCE
 }
 
 fn part_01(input: &[Vec<Character>]) {
-    let points: usize = input
+    let points: usize = filter_lines(input, LineStatus::Corrupted)
         .iter()
-        .map(|line| {
-            let mut stack = Vec::new();
-            for c in line {
-                match c.open_close {
-                    OpenClose::Open => stack.push(c),
-                    OpenClose::Close => match stack.pop() {
-                        None => return c.char_type.corrupt_point_value(),
-                        Some(c_stack) => {
-                            if c_stack.char_type == c.char_type
-                                && c_stack.open_close == OpenClose::Open
-                            {
-                                continue;
-                            }
-                            return c.char_type.corrupt_point_value();
-                        }
-                    },
-                }
+        .filter_map(|c| {
+            if let BadLineChars::Corrupted(c) = c {
+                Some(c.char_type.corrupt_point_value())
+            } else {
+                None
             }
-            0
         })
         .sum();
 
@@ -46,39 +33,20 @@ fn part_01(input: &[Vec<Character>]) {
 }
 
 fn part_02(input: &[Vec<Character>]) {
-    let mut scores: Vec<_> = input
+    let mut scores: Vec<_> = filter_lines(input, LineStatus::Incomplete)
         .iter()
-        .filter_map(|line| {
-            let mut stack = Vec::new();
-            for c in line {
-                match c.open_close {
-                    OpenClose::Open => stack.push(c),
-                    OpenClose::Close => match stack.pop() {
-                        None => return None,
-                        Some(c_stack) => {
-                            if c_stack.char_type == c.char_type
-                                && c_stack.open_close == OpenClose::Open
-                            {
-                                continue;
-                            }
-                            return None;
-                        }
-                    },
-                }
+        .filter_map(|c| {
+            if let BadLineChars::Incomplete(chars) = c {
+                let score = chars
+                    .iter()
+                    .rev()
+                    .fold(0, |acc, x| 5 * acc + x.char_type.incomplete_point_value());
+                Some(score)
+            } else {
+                None
             }
-
-            if stack.is_empty() {
-                return None;
-            }
-
-            // Incomplete
-            let score = stack.iter().rev().fold(0, |acc, x| {
-                5 * acc + x.char_type.incomplete_point_value()
-            });
-            Some(score)
         })
         .collect();
-
 
     if scores.is_empty() {
         println!("Part 2: No scores");
@@ -90,6 +58,49 @@ fn part_02(input: &[Vec<Character>]) {
     let middle_score = scores[middle_score_idx];
 
     println!("Part 1: {}", middle_score);
+}
+
+fn filter_lines(input: &[Vec<Character>], status: LineStatus) -> Vec<BadLineChars> {
+    input
+        .iter()
+        .filter_map(|line| {
+            let mut stack = Vec::new();
+            for c in line {
+                match c.open_close {
+                    OpenClose::Open => stack.push(c),
+                    OpenClose::Close => {
+                        if let Some(c_stack) = stack.pop() {
+                            if c_stack.char_type == c.char_type
+                                && c_stack.open_close == OpenClose::Open
+                            {
+                                // Matching bracket, do next character
+                                continue;
+                            }
+                        }
+
+                        // Corrupt
+                        if status == LineStatus::Corrupted {
+                            return Some(BadLineChars::Corrupted(c));
+                        }
+
+                        return None;
+                    }
+                }
+            }
+
+            // Complete
+            if stack.is_empty() {
+                return None;
+            }
+
+            // Incomplete
+            if status == LineStatus::Incomplete {
+                return Some(BadLineChars::Incomplete(stack));
+            }
+
+            None
+        })
+        .collect()
 }
 
 #[derive(Debug)]
@@ -175,4 +186,15 @@ impl TryFrom<char> for Character {
 enum OpenClose {
     Open,
     Close,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+enum LineStatus {
+    Incomplete,
+    Corrupted,
+}
+
+enum BadLineChars<'a> {
+    Incomplete(Vec<&'a Character>),
+    Corrupted(&'a Character),
 }
