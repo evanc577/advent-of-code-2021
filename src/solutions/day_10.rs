@@ -13,8 +13,8 @@ pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
 
 fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Vec<Character>>, AOCError> {
     read_input_lines(input_path)?
-        .map(|s| s.chars().map(|c| c.try_into()).collect::<Result<_, _>>())
-        .collect::<Result<_, _>>()
+        .map(|s| s.chars().map(|c| c.try_into()).collect())
+        .collect()
 }
 
 fn part_01(input: &[Vec<Character>]) {
