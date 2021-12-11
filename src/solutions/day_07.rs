@@ -43,3 +43,22 @@ fn abs_diff(a: usize, b: usize) -> usize {
 fn triangular(n: usize) -> usize {
     (n * (n + 1)) / 2
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const INPUT: &str = "16,1,2,0,4,2,7,1,2,14";
+
+    #[test]
+    fn test_part_1() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_1(), Some(37));
+    }
+
+    #[test]
+    fn test_part_2() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_2(), Some(168));
+    }
+}

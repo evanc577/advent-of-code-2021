@@ -147,3 +147,31 @@ fn sign(n: isize) -> isize {
         _ => -1,
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const INPUT: &str = "0,9 -> 5,9
+8,0 -> 0,8
+9,4 -> 3,4
+2,2 -> 2,1
+7,0 -> 7,4
+6,4 -> 2,0
+0,9 -> 2,9
+3,4 -> 1,4
+0,0 -> 8,8
+5,5 -> 8,2";
+
+    #[test]
+    fn test_part_1() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_1(), Some(5));
+    }
+
+    #[test]
+    fn test_part_2() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_2(), Some(12));
+    }
+}

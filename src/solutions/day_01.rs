@@ -40,3 +40,31 @@ impl Day for Day01 {
         )
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const INPUT: &str = "199
+200
+208
+210
+200
+207
+240
+269
+260
+263";
+
+    #[test]
+    fn test_part_1() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_1(), Some(7));
+    }
+
+    #[test]
+    fn test_part_2() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_2(), Some(5));
+    }
+}

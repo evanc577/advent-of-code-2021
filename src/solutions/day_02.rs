@@ -70,3 +70,27 @@ enum Movement {
     Down(isize),
     Up(isize),
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const INPUT: &str = "forward 5
+down 5
+forward 8
+up 3
+down 8
+forward 2";
+
+    #[test]
+    fn test_part_1() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_1(), Some(150));
+    }
+
+    #[test]
+    fn test_part_2() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_2(), Some(900));
+    }
+}

@@ -86,3 +86,26 @@ fn basin_size(input: &Array2<usize>, point: (usize, usize)) -> usize {
     }
     count
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    const INPUT: &str = "2199943210
+3987894921
+9856789892
+8767896789
+9899965678";
+
+    #[test]
+    fn test_part_1() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_1(), Some(15));
+    }
+
+    #[test]
+    fn test_part_2() {
+        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_2(), Some(1134));
+    }
+}
