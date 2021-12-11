@@ -19,12 +19,12 @@ pub fn dispatch(day: DayNum) -> Result<BTreeMap<usize, Vec<Option<usize>>>, AOCE
     let mut ret = BTreeMap::new();
     match day {
         DayNum::One(d, i) => {
-            ret.insert(d, run_one_solution(d, i)?);
+            ret.insert(d, run(get_runner(d, i)?)?);
         }
         DayNum::All => {
             for d in 1..=11 {
                 let input_path = format!("input/day_{:02}.txt", d);
-                ret.insert(d, run_one_solution(d, input_path)?);
+                ret.insert(d, run(get_runner(d, input_path)?)?);
             }
         }
     }
@@ -32,10 +32,10 @@ pub fn dispatch(day: DayNum) -> Result<BTreeMap<usize, Vec<Option<usize>>>, AOCE
     Ok(ret)
 }
 
-fn run_one_solution(
+pub fn get_runner(
     day: usize,
     input_path: impl AsRef<Path>,
-) -> Result<Vec<Option<usize>>, AOCError> {
+) -> Result<Box<dyn Day>, AOCError> {
     let input = read_input_lines(input_path)?;
     let runner = match day {
         1 => day_01::new(input)?,
@@ -51,6 +51,9 @@ fn run_one_solution(
         11 => day_11::new(input)?,
         _ => unimplemented!(),
     };
+    Ok(runner)
+}
 
+pub fn run(runner: Box<dyn Day>) -> Result<Vec<Option<usize>>, AOCError> {
     Ok(vec![runner.part_1(), runner.part_2()])
 }
