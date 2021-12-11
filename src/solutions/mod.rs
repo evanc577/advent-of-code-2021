@@ -12,6 +12,7 @@ mod day_07;
 mod day_08;
 mod day_09;
 mod day_10;
+mod day_11;
 
 pub fn dispatch(day: usize, input_path: impl AsRef<Path>) -> Result<(), AOCError> {
     match day {
@@ -25,6 +26,7 @@ pub fn dispatch(day: usize, input_path: impl AsRef<Path>) -> Result<(), AOCError
         8 => day_08::run(input_path)?,
         9 => day_09::run(input_path)?,
         10 => day_10::run(input_path)?,
+        11 => day_11::run(input_path)?,
         _ => return Err(AOCError::DayOutOfRange(day)),
     }
     Ok(())
