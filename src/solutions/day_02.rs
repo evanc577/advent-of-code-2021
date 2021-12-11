@@ -6,9 +6,19 @@ pub struct Day02 {
 }
 
 pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    Ok(Box::new(Day02 {
-        input: parse_input(input)?,
-    }))
+    let parsed = input
+        .map(|s| {
+            let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::ParseError)?;
+            match (split.0.to_lowercase().as_str(), split.1.parse()) {
+                ("forward", Ok(n)) => Ok(Movement::Forward(n)),
+                ("down", Ok(n)) => Ok(Movement::Down(n)),
+                ("up", Ok(n)) => Ok(Movement::Up(n)),
+                (s, Err(e)) => Err(AOCError::ParseIntError(e, s.into())),
+                _ => Err(AOCError::ParseError),
+            }
+        })
+        .collect::<Result<_, _>>()?;
+    Ok(Box::new(Day02 { input: parsed }))
 }
 
 impl Day for Day02 {
@@ -46,22 +56,6 @@ impl Day for Day02 {
 
         (final_pos.horizontal * final_pos.depth).try_into().ok()
     }
-}
-
-fn parse_input(input: impl Iterator<Item = String>) -> Result<Vec<Movement>, AOCError> {
-    let input = input
-        .map(|s| {
-            let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::ParseError)?;
-            match (split.0.to_lowercase().as_str(), split.1.parse()) {
-                ("forward", Ok(n)) => Ok(Movement::Forward(n)),
-                ("down", Ok(n)) => Ok(Movement::Down(n)),
-                ("up", Ok(n)) => Ok(Movement::Up(n)),
-                (s, Err(e)) => Err(AOCError::ParseIntError(e, s.into())),
-                _ => Err(AOCError::ParseError),
-            }
-        })
-        .collect::<Result<_, _>>()?;
-    Ok(input)
 }
 
 #[derive(Default)]

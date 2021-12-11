@@ -6,9 +6,10 @@ pub struct Day01 {
 }
 
 pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    Ok(Box::new(Day01 {
-        input: parse_input(input)?,
-    }))
+    let parsed = input
+        .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s)))
+        .collect::<Result<_, _>>()?;
+    Ok(Box::new(Day01 { input: parsed }))
 }
 
 impl Day for Day01 {
@@ -38,12 +39,4 @@ impl Day for Day01 {
                 .count(),
         )
     }
-
-}
-
-fn parse_input(input: impl Iterator<Item = String>) -> Result<Vec<usize>, AOCError> {
-    let input = input
-        .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s)))
-        .collect::<Result<_, _>>()?;
-    Ok(input)
 }

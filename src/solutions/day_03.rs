@@ -6,9 +6,15 @@ pub struct Day03 {
 }
 
 pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    Ok(Box::new(Day03 {
-        input: parse_input(input)?,
-    }))
+    let input_lines: Vec<_> = input.collect();
+    let num_bits = input_lines[0].len();
+    let mut arr = Array2::default((input_lines.len(), num_bits));
+    for (i, n) in input_lines.iter().enumerate() {
+        for (j, c) in n.chars().enumerate() {
+            arr[[i, j]] = c.into();
+        }
+    }
+    Ok(Box::new(Day03 { input: arr }))
 }
 
 impl Day for Day03 {
@@ -37,22 +43,7 @@ impl Day for Day03 {
     }
 }
 
-fn parse_input(input: impl Iterator<Item = String>) -> Result<Array2<Bit>, AOCError> {
-    let input_lines: Vec<_> = input.collect();
-    let num_bits = input_lines[0].len();
-    let mut arr = Array2::default((input_lines.len(), num_bits));
-    for (i, n) in input_lines.iter().enumerate() {
-        for (j, c) in n.chars().enumerate() {
-            arr[[i, j]] = c.into();
-        }
-    }
-    Ok(arr)
-}
-
-fn part_02_helper(
-    mut input: Array2<Bit>,
-    pred: &dyn Fn(usize, usize) -> bool,
-) -> BinaryNumber {
+fn part_02_helper(mut input: Array2<Bit>, pred: &dyn Fn(usize, usize) -> bool) -> BinaryNumber {
     for j in 0..input.shape()[1] {
         let col = input.index_axis(Axis(1), j);
         let zeros = col.iter().filter(|&&v| v == Bit::Zero).count();
@@ -79,11 +70,7 @@ fn part_02_helper(
         return BinaryNumber::new();
     }
 
-    input
-        .index_axis(Axis(0), 0)
-        .iter()
-        .copied()
-        .collect()
+    input.index_axis(Axis(0), 0).iter().copied().collect()
 }
 
 #[derive(Clone, Debug)]
