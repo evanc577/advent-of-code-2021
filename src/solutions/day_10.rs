@@ -1,63 +1,56 @@
-use std::path::Path;
+use crate::prelude::*;
 
-use aoc2021::prelude::*;
-
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input);
-    part_02(&input);
-
-    Ok(())
+pub struct Day10 {
+    input: Vec<Vec<Character>>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Vec<Character>>, AOCError> {
-    read_input_lines(input_path)?
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    let parsed: Result<_, _> = input
         .map(|s| s.chars().map(|c| c.try_into()).collect())
-        .collect()
-}
-
-fn part_01(input: &[Vec<Character>]) {
-    let points: usize = filter_lines(input, LineStatus::Corrupted)
-        .iter()
-        .filter_map(|c| {
-            if let BadLineChars::Corrupted(c) = c {
-                Some(c.char_type.corrupt_point_value())
-            } else {
-                None
-            }
-        })
-        .sum();
-
-    println!("Part 1: {}", points);
-}
-
-fn part_02(input: &[Vec<Character>]) {
-    let mut scores: Vec<_> = filter_lines(input, LineStatus::Incomplete)
-        .iter()
-        .filter_map(|c| {
-            if let BadLineChars::Incomplete(chars) = c {
-                let score = chars
-                    .iter()
-                    .rev()
-                    .fold(0, |acc, x| 5 * acc + x.char_type.incomplete_point_value());
-                Some(score)
-            } else {
-                None
-            }
-        })
         .collect();
+    Ok(Box::new(Day10 { input: parsed? }))
+}
 
-    if scores.is_empty() {
-        println!("Part 2: No scores");
-        return;
+impl Day for Day10 {
+    fn part_1(&self) -> Option<usize> {
+        let points: usize = filter_lines(&self.input, LineStatus::Corrupted)
+            .iter()
+            .filter_map(|c| {
+                if let BadLineChars::Corrupted(c) = c {
+                    Some(c.char_type.corrupt_point_value())
+                } else {
+                    None
+                }
+            })
+            .sum();
+        Some(points)
     }
 
-    let middle_score_idx = scores.len() / 2;
-    scores[..].select_nth_unstable(middle_score_idx);
-    let middle_score = scores[middle_score_idx];
+    fn part_2(&self) -> Option<usize> {
+        let mut scores: Vec<_> = filter_lines(&self.input, LineStatus::Incomplete)
+            .iter()
+            .filter_map(|c| {
+                if let BadLineChars::Incomplete(chars) = c {
+                    let score = chars
+                        .iter()
+                        .rev()
+                        .fold(0, |acc, x| 5 * acc + x.char_type.incomplete_point_value());
+                    Some(score)
+                } else {
+                    None
+                }
+            })
+            .collect();
 
-    println!("Part 1: {}", middle_score);
+        if scores.is_empty() {
+            return None;
+        }
+
+        let middle_score_idx = scores.len() / 2;
+        scores[..].select_nth_unstable(middle_score_idx);
+        let middle_score = scores[middle_score_idx];
+        Some(middle_score)
+    }
 }
 
 fn filter_lines(input: &[Vec<Character>], status: LineStatus) -> Vec<BadLineChars> {

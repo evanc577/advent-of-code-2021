@@ -1,20 +1,14 @@
 use std::collections::HashMap;
-use std::path::Path;
 
-use aoc2021::prelude::*;
+use crate::prelude::*;
 
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input[..]);
-    part_02(&input[..]);
-
-    Ok(())
+pub struct Day05 {
+    input: Vec<Line>,
 }
 
 #[allow(clippy::match_ref_pats)]
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Line>, AOCError> {
-    let input: Vec<_> = read_input_lines(input_path)?
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    let parsed: Vec<_> = input
         .filter_map(|line_str| {
             // Parse line in form "a,b -> x,y"
             if let points_str @ &[_, _] = line_str.split(" -> ").collect::<Vec<_>>().as_slice() {
@@ -44,17 +38,19 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Line>, AOCError> {
         })
         .collect();
 
-    Ok(input)
+    Ok(Box::new(Day05 { input: parsed }))
 }
 
-fn part_01(input: &[Line]) {
-    let grid = Grid::with_lines(input, AllowDiagonals::No);
-    println!("Part 1: {}", grid.overlaps());
-}
+impl Day for Day05 {
+    fn part_1(&self) -> Option<usize> {
+        let grid = Grid::with_lines(&self.input, AllowDiagonals::No);
+        Some(grid.overlaps())
+    }
 
-fn part_02(input: &[Line]) {
-    let grid = Grid::with_lines(input, AllowDiagonals::Yes);
-    println!("Part 2: {}", grid.overlaps());
+    fn part_2(&self) -> Option<usize> {
+        let grid = Grid::with_lines(&self.input, AllowDiagonals::Yes);
+        Some(grid.overlaps())
+    }
 }
 
 struct Grid(HashMap<Point, usize>);

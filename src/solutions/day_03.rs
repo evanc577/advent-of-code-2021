@@ -1,19 +1,44 @@
-use std::fmt;
-use std::path::Path;
+use crate::prelude::*;
+use ndarray::Array2;
 
-use aoc2021::prelude::*;
-
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input);
-    part_02(&input);
-
-    Ok(())
+pub struct Day03 {
+    input: Array2<Bit>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<ndarray::Array2<Bit>, AOCError> {
-    let input_lines: Vec<_> = read_input_lines(input_path)?.collect();
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    Ok(Box::new(Day03 {
+        input: parse_input(input)?,
+    }))
+}
+
+impl Day for Day03 {
+    fn part_1(&self) -> Option<usize> {
+        let gamma: BinaryNumber = self
+            .input
+            .axis_iter(ndarray::Axis(1))
+            .map(|col| {
+                let zeros = col.iter().filter(|&&v| v == Bit::Zero).count();
+                let ones = col.len() - zeros;
+                if ones >= zeros {
+                    Bit::One
+                } else {
+                    Bit::Zero
+                }
+            })
+            .collect();
+        let epsilon = !gamma.clone();
+        Some(gamma.to_usize() * epsilon.to_usize())
+    }
+
+    fn part_2(&self) -> Option<usize> {
+        let o2 = part_02_helper(self.input.clone(), &|zeros, ones| ones >= zeros);
+        let co2 = part_02_helper(self.input.clone(), &|zeros, ones| zeros > ones);
+        Some(o2.to_usize() * co2.to_usize())
+    }
+}
+
+fn parse_input(input: impl Iterator<Item = String>) -> Result<ndarray::Array2<Bit>, AOCError> {
+    let input_lines: Vec<_> = input.collect();
     let num_bits = input_lines[0].len();
     let mut arr = ndarray::Array2::default((input_lines.len(), num_bits));
     for (i, n) in input_lines.iter().enumerate() {
@@ -22,39 +47,6 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<ndarray::Array2<Bit>, AOC
         }
     }
     Ok(arr)
-}
-
-fn part_01(input: &ndarray::Array2<Bit>) {
-    let gamma: BinaryNumber = input
-        .axis_iter(ndarray::Axis(1))
-        .map(|col| {
-            let zeros = col.iter().filter(|&&v| v == Bit::Zero).count();
-            let ones = col.len() - zeros;
-            if ones >= zeros {
-                Bit::One
-            } else {
-                Bit::Zero
-            }
-        })
-        .collect();
-    let epsilon = !gamma.clone();
-    let rate = Output {
-        first: gamma,
-        second: epsilon,
-    };
-
-    println!("Part 1: {}", rate)
-}
-
-fn part_02(input: &ndarray::Array2<Bit>) {
-    let o2 = part_02_helper(input.clone(), &|zeros, ones| ones >= zeros);
-    let co2 = part_02_helper(input.clone(), &|zeros, ones| zeros > ones);
-    let rating = Output {
-        first: o2,
-        second: co2,
-    };
-
-    println!("Part 2: {}", rating);
 }
 
 fn part_02_helper(
@@ -177,22 +169,5 @@ impl std::ops::Not for Bit {
             Self::Zero => Self::One,
             Self::One => Self::Zero,
         }
-    }
-}
-
-struct Output {
-    first: BinaryNumber,
-    second: BinaryNumber,
-}
-
-impl fmt::Display for Output {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(
-            f,
-            "first: {}, second: {}, multiplied: {}",
-            self.first.to_usize(),
-            self.second.to_usize(),
-            self.first.to_usize() * self.second.to_usize()
-        )
     }
 }

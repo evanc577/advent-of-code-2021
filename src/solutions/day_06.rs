@@ -1,32 +1,27 @@
-use std::path::Path;
+use crate::prelude::*;
 
-use aoc2021::prelude::*;
-
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input[..]);
-    part_02(&input[..]);
-
-    Ok(())
+pub struct Day06 {
+    input: Vec<usize>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
-    let input: Vec<_> = read_input_lines(input_path)?
+pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    let parsed: Vec<_> = input
         .next()
         .ok_or(AOCError::ParseError)?
         .split(',')
         .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s.into())))
         .collect::<Result<_, _>>()?;
-    Ok(input)
+    Ok(Box::new(Day06 { input: parsed }))
 }
 
-fn part_01(input: &[usize]) {
-    println!("Part 1: {}", simulate(input, 80));
-}
+impl Day for Day06 {
+    fn part_1(&self) -> Option<usize> {
+        Some(simulate(&self.input, 80))
+    }
 
-fn part_02(input: &[usize]) {
-    println!("Part 2: {}", simulate(input, 256));
+    fn part_2(&self) -> Option<usize> {
+        Some(simulate(&self.input, 256))
+    }
 }
 
 fn simulate(input: &[usize], num_days: usize) -> usize {

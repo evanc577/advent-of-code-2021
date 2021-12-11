@@ -1,20 +1,14 @@
 use std::cmp::Ordering;
-use std::path::Path;
 
-use aoc2021::prelude::*;
+use crate::prelude::*;
 use itertools::Itertools;
 
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input[..]);
-    part_02(&input[..]);
-
-    Ok(())
+pub struct Day08 {
+    input: Vec<Entry>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Entry>, AOCError> {
-    let input: Vec<_> = read_input_lines(input_path)?
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    let parsed: Vec<_> = input
         .map(|s| {
             let (signals, outputs) =
                 if let [signals_str, outputs_str] = *s.split(" | ").take(2).collect::<Vec<_>>() {
@@ -34,69 +28,71 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Entry>, AOCError> {
             Entry { signals, outputs }
         })
         .collect();
-    Ok(input)
+    Ok(Box::new(Day08 { input: parsed }))
 }
 
-fn part_01(input: &[Entry]) {
-    let count: usize = input
-        .iter()
-        .map(|e| {
-            e.outputs
-                .iter()
-                .filter(|p| matches!(p.0.len(), 2 | 3 | 4 | 7))
-                .count()
-        })
-        .sum();
+impl Day for Day08 {
+    fn part_1(&self) -> Option<usize> {
+        let count: usize = self
+            .input
+            .iter()
+            .map(|e| {
+                e.outputs
+                    .iter()
+                    .filter(|p| matches!(p.0.len(), 2 | 3 | 4 | 7))
+                    .count()
+            })
+            .sum();
+        Some(count)
+    }
 
-    println!("Part 1: {}", count);
-}
+    fn part_2(&self) -> Option<usize> {
+        use WireSegment::*;
+        const ALL_WIRESEGMENTS: [WireSegment; 7] = [A, B, C, D, E, F, G];
 
-fn part_02(input: &[Entry]) {
-    use WireSegment::*;
-    const ALL_WIRESEGMENTS: [WireSegment; 7] = [A, B, C, D, E, F, G];
+        // Sum results of all lines
+        let sum: usize = self
+            .input
+            .iter()
+            .map(|entry| {
+                let patterns: Vec<_> = entry
+                    .signals
+                    .iter()
+                    .chain(entry.outputs.iter())
+                    .cloned()
+                    .collect();
 
-    // Sum results of all lines
-    let sum: usize = input
-        .iter()
-        .map(|entry| {
-            let patterns: Vec<_> = entry
-                .signals
-                .iter()
-                .chain(entry.outputs.iter())
-                .cloned()
-                .collect();
-
-            // Loop over all possible permutations
-            'permutation_loop: for permutation in
-                ALL_WIRESEGMENTS.iter().permutations(ALL_WIRESEGMENTS.len())
-            {
-                // Check if permutation results in a valid mapping
-                for pattern in &patterns {
-                    let mapped_pattern = map_pattern(&permutation[..], &pattern.0);
-                    if segments_to_digit(&mapped_pattern[..]).is_none() {
-                        continue 'permutation_loop;
+                // Loop over all possible permutations
+                'permutation_loop: for permutation in
+                    ALL_WIRESEGMENTS.iter().permutations(ALL_WIRESEGMENTS.len())
+                {
+                    // Check if permutation results in a valid mapping
+                    for pattern in &patterns {
+                        let mapped_pattern = map_pattern(&permutation[..], &pattern.0);
+                        if segments_to_digit(&mapped_pattern[..]).is_none() {
+                            continue 'permutation_loop;
+                        }
                     }
+
+                    // compute output digits
+                    let num = entry
+                        .outputs
+                        .iter()
+                        .filter_map(|p| {
+                            let mapped_pattern = map_pattern(&permutation[..], &p.0);
+                            segments_to_digit(&mapped_pattern)
+                        })
+                        .reduce(|acc, x| 10 * acc + x)
+                        .unwrap_or(0);
+                    return num;
                 }
 
-                // compute output digits
-                let num = entry
-                    .outputs
-                    .iter()
-                    .filter_map(|p| {
-                        let mapped_pattern = map_pattern(&permutation[..], &p.0);
-                        segments_to_digit(&mapped_pattern)
-                    })
-                    .reduce(|acc, x| 10 * acc + x)
-                    .unwrap_or(0);
-                return num;
-            }
-
-            // No mapping found? Just return 0
-            0
-        })
-        .sum();
-
-    println!("Part 2: {}", sum);
+                // No mapping found? Just return 0
+                0
+            })
+            .sum();
+        Some(sum)
+    }
 }
 
 fn map_pattern(permutation: &[&WireSegment], pattern: &[WireSegment]) -> Vec<WireSegment> {

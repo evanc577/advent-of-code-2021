@@ -1,5 +1,4 @@
-mod solutions;
-
+use std::ffi::OsString;
 use std::process::exit;
 
 use aoc2021::prelude::*;
@@ -23,21 +22,25 @@ fn run() -> Result<(), AOCError> {
                 .required(true)
                 .index(1),
         )
-        .arg(
-            Arg::with_name("input")
-                .help("Input file to use")
-                .required(true)
-                .index(2),
-        )
+        .arg(Arg::with_name("input").help("Input file to use").index(2))
         .get_matches();
 
     let day = {
         let day_str = matches.value_of_os("day").unwrap();
-        match day_str.to_string_lossy().parse::<usize>() {
-            Ok(d) => d,
-            Err(_) => return Err(AOCError::BadDay(day_str.to_owned())),
+        if day_str == "all" {
+            DayNum::All
+        } else {
+            match day_str.to_string_lossy().parse::<usize>() {
+                Ok(d) => {
+                    let input_path = matches
+                        .value_of_os("input").map(|s| s.to_owned())
+                        .unwrap_or_else(|| OsString::from(format!("input/day_{:02}.txt", d)));
+                    DayNum::One(d, input_path)
+                }
+                Err(_) => return Err(AOCError::BadDay(day_str.to_owned())),
+            }
         }
     };
 
-    solutions::dispatch(day, matches.value_of_os("input").unwrap())
+    run_solutions(day)
 }

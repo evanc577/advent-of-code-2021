@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use aoc2021::prelude::AOCError;
+use crate::prelude::*;
 
 mod day_01;
 mod day_02;
@@ -14,20 +14,47 @@ mod day_09;
 mod day_10;
 mod day_11;
 
-pub fn dispatch(day: usize, input_path: impl AsRef<Path>) -> Result<(), AOCError> {
+pub fn dispatch(day: DayNum) -> Result<(), AOCError> {
     match day {
-        1 => day_01::run(input_path)?,
-        2 => day_02::run(input_path)?,
-        3 => day_03::run(input_path)?,
-        4 => day_04::run(input_path)?,
-        5 => day_05::run(input_path)?,
-        6 => day_06::run(input_path)?,
-        7 => day_07::run(input_path)?,
-        8 => day_08::run(input_path)?,
-        9 => day_09::run(input_path)?,
-        10 => day_10::run(input_path)?,
-        11 => day_11::run(input_path)?,
-        _ => return Err(AOCError::DayOutOfRange(day)),
+        DayNum::One(d, i) => run_one_solution(d, i),
+        DayNum::All => {
+            for d in 1..=11 {
+                let input_path = format!("input/day_{:02}.txt", d);
+                run_one_solution(d, input_path)?;
+            }
+            Ok(())
+        }
     }
+}
+
+fn run_one_solution(day: usize, input_path: impl AsRef<Path>) -> Result<(), AOCError> {
+    let input = read_input_lines(input_path)?;
+    let runner = match day {
+        1 => day_01::new(input)?,
+        2 => day_02::new(input)?,
+        3 => day_03::new(input)?,
+        4 => day_04::new(input)?,
+        5 => day_05::new(input)?,
+        6 => day_06::new(input)?,
+        7 => day_07::new(input)?,
+        8 => day_08::new(input)?,
+        9 => day_09::new(input)?,
+        10 => day_10::new(input)?,
+        11 => day_11::new(input)?,
+        _ => unimplemented!(),
+    };
+
+    let solution_1 = match runner.part_1() {
+        Some(x) => x.to_string(),
+        None => "No solution".into(),
+    };
+    let solution_2 = match runner.part_2() {
+        Some(x) => x.to_string(),
+        None => "No solution".into(),
+    };
+
+    println!("Day {} Part 1: {}", day, solution_1);
+    println!("Day {} Part 2: {}", day, solution_2);
+
     Ok(())
 }

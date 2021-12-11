@@ -1,19 +1,12 @@
-use std::path::Path;
-
-use aoc2021::prelude::*;
+use crate::prelude::*;
 use ndarray::Array2;
 
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input);
-    part_02(&input);
-
-    Ok(())
+pub struct Day11 {
+    input: Array2<Option<Octopus>>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Array2<Option<Octopus>>, AOCError> {
-    let lines: Vec<_> = read_input_lines(input_path)?.collect();
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    let lines: Vec<_> = input.collect();
     let num_lines = lines.len();
     let line_len = lines.get(0).ok_or(AOCError::ParseError)?.len();
 
@@ -28,15 +21,17 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Array2<Option<Octopus>>, 
             });
         }
     }
-    Ok(arr)
+    Ok(Box::new(Day11 { input: arr }))
 }
 
-fn part_01(input: &Array2<Option<Octopus>>) {
-    println!("Part 1: {}", simulate(input, EndCondition::Step(100)));
-}
+impl Day for Day11 {
+    fn part_1(&self) -> Option<usize> {
+        Some(simulate(&self.input, EndCondition::Step(100)))
+    }
 
-fn part_02(input: &Array2<Option<Octopus>>) {
-    println!("Part 2: {}", simulate(input, EndCondition::Synchronized));
+    fn part_2(&self) -> Option<usize> {
+        Some(simulate(&self.input, EndCondition::Synchronized))
+    }
 }
 
 fn simulate(input: &Array2<Option<Octopus>>, end: EndCondition) -> usize {

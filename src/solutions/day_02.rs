@@ -1,20 +1,55 @@
-use std::fmt;
-use std::path::Path;
-
-use aoc2021::prelude::*;
+use crate::prelude::*;
 use itertools::Itertools;
 
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input[..]);
-    part_02(&input[..]);
-
-    Ok(())
+pub struct Day02 {
+    input: Vec<Movement>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Movement>, AOCError> {
-    let input = read_input_lines(input_path)?
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    Ok(Box::new(Day02 {
+        input: parse_input(input)?,
+    }))
+}
+
+impl Day for Day02 {
+    fn part_1(&self) -> Option<usize> {
+        let final_pos = self
+            .input
+            .iter()
+            .fold(Default::default(), |mut acc: Position, m| {
+                match m {
+                    Movement::Forward(n) => acc.horizontal += n,
+                    Movement::Down(n) => acc.depth += n,
+                    Movement::Up(n) => acc.depth -= n,
+                }
+                acc
+            });
+
+        (final_pos.horizontal * final_pos.depth).try_into().ok()
+    }
+
+    fn part_2(&self) -> Option<usize> {
+        let final_pos = self
+            .input
+            .iter()
+            .fold(Default::default(), |mut acc: Position, m| {
+                match m {
+                    Movement::Forward(n) => {
+                        acc.horizontal += n;
+                        acc.depth += acc.aim * n;
+                    }
+                    Movement::Down(n) => acc.aim += n,
+                    Movement::Up(n) => acc.aim -= n,
+                }
+                acc
+            });
+
+        (final_pos.horizontal * final_pos.depth).try_into().ok()
+    }
+}
+
+fn parse_input(input: impl Iterator<Item = String>) -> Result<Vec<Movement>, AOCError> {
+    let input = input
         .map(|s| {
             let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::ParseError)?;
             match (split.0.to_lowercase().as_str(), split.1.parse()) {
@@ -29,56 +64,11 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<Movement>, AOCError> 
     Ok(input)
 }
 
-fn part_01(input: &[Movement]) {
-    let final_pos = input
-        .iter()
-        .fold(Default::default(), |mut acc: Position, m| {
-            match m {
-                Movement::Forward(n) => acc.horizontal += n,
-                Movement::Down(n) => acc.depth += n,
-                Movement::Up(n) => acc.depth -= n,
-            }
-            acc
-        });
-
-    println!("Part 1: {}", final_pos);
-}
-
-fn part_02(input: &[Movement]) {
-    let final_pos = input
-        .iter()
-        .fold(Default::default(), |mut acc: Position, m| {
-            match m {
-                Movement::Forward(n) => {
-                    acc.horizontal += n;
-                    acc.depth += acc.aim * n;
-                }
-                Movement::Down(n) => acc.aim += n,
-                Movement::Up(n) => acc.aim -= n,
-            }
-            acc
-        });
-
-    println!("Part 2: {}", final_pos);
-}
-
 #[derive(Default)]
 struct Position {
     horizontal: isize,
     depth: isize,
     aim: isize,
-}
-
-impl fmt::Display for Position {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(
-            f,
-            "horizontal: {}, depth: {}, multiplied: {}",
-            self.horizontal,
-            self.depth,
-            self.horizontal * self.depth
-        )
-    }
 }
 
 enum Movement {

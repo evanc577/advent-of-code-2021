@@ -1,34 +1,29 @@
-use std::path::Path;
+use crate::prelude::*;
 
-use aoc2021::prelude::*;
-
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input[..]);
-    part_02(&input[..]);
-
-    Ok(())
+pub struct Day07 {
+    input: Vec<usize>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Vec<usize>, AOCError> {
-    let input: Vec<_> = read_input_lines(input_path)?
+pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    let parsed: Vec<_> = input
         .next()
         .ok_or(AOCError::ParseError)?
         .split(',')
         .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s.into())))
         .collect::<Result<_, _>>()?;
-    Ok(input)
+    Ok(Box::new(Day07 { input: parsed }))
 }
 
-fn part_01(input: &[usize]) {
-    let fuel = calculate(input, &|a, b| abs_diff(a, b));
-    println!("Part 1: {}", fuel);
-}
+impl Day for Day07 {
+    fn part_1(&self) -> Option<usize> {
+        let fuel = calculate(&self.input, &|a, b| abs_diff(a, b));
+        Some(fuel)
+    }
 
-fn part_02(input: &[usize]) {
-    let fuel = calculate(input, &|a, b| triangular(abs_diff(a, b)));
-    println!("Part 2: {}", fuel);
+    fn part_2(&self) -> Option<usize> {
+        let fuel = calculate(&self.input, &|a, b| triangular(abs_diff(a, b)));
+        Some(fuel)
+    }
 }
 
 fn calculate(input: &[usize], f: &dyn Fn(usize, usize) -> usize) -> usize {

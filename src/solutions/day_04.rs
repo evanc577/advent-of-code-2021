@@ -1,20 +1,57 @@
 use std::fmt;
-use std::path::Path;
 
-use aoc2021::prelude::*;
+use crate::prelude::*;
 use itertools::Itertools;
 
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(input.clone());
-    part_02(input);
-
-    Ok(())
+pub struct Day04 {
+    input: BingoInput,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
-    let mut input_iter = read_input_lines(input_path)?;
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    Ok(Box::new(Day04 {
+        input: parse_input(input)?,
+    }))
+}
+
+impl Day for Day04 {
+    fn part_1(&self) -> Option<usize> {
+        let mut input = self.input.clone();
+        for n in input.number_order {
+            for board in input.boards.iter_mut() {
+                if board.mark_cell(n) == GameState::Completed {
+                    return Some(board.score());
+                }
+            }
+        }
+        None
+    }
+
+    fn part_2(&self) -> Option<usize> {
+        let mut input = self.input.clone();
+        let mut boards_ref: Vec<_> = input.boards.iter_mut().collect();
+        let mut uncomplete_count = boards_ref.len();
+
+        for n in input.number_order {
+            for board in boards_ref.iter_mut() {
+                if board.state == GameState::Completed {
+                    continue;
+                }
+
+                if board.mark_cell(n) == GameState::Completed {
+                    uncomplete_count -= 1;
+                }
+
+                if uncomplete_count == 0 {
+                    return Some(board.score());
+                }
+            }
+        }
+        None
+    }
+}
+
+fn parse_input(input: impl Iterator<Item = String>) -> Result<BingoInput, AOCError> {
+    let mut input_iter = input;
 
     // Parse number order
     let number_order = input_iter
@@ -59,41 +96,6 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<BingoInput, AOCError> {
         boards,
         number_order,
     })
-}
-
-fn part_01(mut input: BingoInput) {
-    for n in input.number_order {
-        for board in input.boards.iter_mut() {
-            if board.mark_cell(n) == GameState::Completed {
-                println!("Part 1: {}", board);
-                return;
-            }
-        }
-    }
-    println!("Part 1: No solution");
-}
-
-fn part_02(mut input: BingoInput) {
-    let mut boards_ref: Vec<_> = input.boards.iter_mut().collect();
-    let mut uncomplete_count = boards_ref.len();
-
-    for n in input.number_order {
-        for board in boards_ref.iter_mut() {
-            if board.state == GameState::Completed {
-                continue;
-            }
-
-            if board.mark_cell(n) == GameState::Completed {
-                uncomplete_count -= 1;
-            }
-
-            if uncomplete_count == 0 {
-                println!("Part 2: {}", board);
-                return;
-            }
-        }
-    }
-    println!("Part 2: No solution");
 }
 
 #[derive(Clone)]

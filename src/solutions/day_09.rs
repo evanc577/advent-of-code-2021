@@ -1,19 +1,12 @@
-use std::path::Path;
-
-use aoc2021::prelude::*;
+use crate::prelude::*;
 use ndarray::Array2;
 
-pub fn run(input_path: impl AsRef<Path>) -> Result<(), AOCError> {
-    let input = parse_input(input_path)?;
-
-    part_01(&input);
-    part_02(&input);
-
-    Ok(())
+pub struct Day09 {
+    input: Array2<usize>,
 }
 
-fn parse_input(input_path: impl AsRef<Path>) -> Result<Array2<usize>, AOCError> {
-    let input: Vec<_> = read_input_lines(input_path)?.collect();
+pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
+    let input: Vec<_> = input.collect();
     let line_len = input.get(0).ok_or(AOCError::ParseError)?.len();
     let mut arr = Array2::<usize>::from_elem((input.len() + 2, line_len + 2), usize::MAX);
     for i in 0..input.len() {
@@ -22,25 +15,27 @@ fn parse_input(input_path: impl AsRef<Path>) -> Result<Array2<usize>, AOCError> 
             arr[[i + 1, j + 1]] = chars[j].parse().unwrap_or(0);
         }
     }
-    Ok(arr)
+    Ok(Box::new(Day09 { input: arr }))
 }
 
-fn part_01(input: &Array2<usize>) {
-    let sum: usize = low_points(input)
-        .iter()
-        .map(|(i, j)| input[[*i, *j]] + 1)
-        .sum();
-    println!("Part 1: {}", sum);
-}
+impl Day for Day09 {
+    fn part_1(&self) -> Option<usize> {
+        let sum: usize = low_points(&self.input)
+            .iter()
+            .map(|(i, j)| &self.input[[*i, *j]] + 1)
+            .sum();
+        Some(sum)
+    }
 
-fn part_02(input: &Array2<usize>) {
-    let mut basins: Vec<_> = low_points(input)
-        .iter()
-        .map(|point| basin_size(input, *point))
-        .collect();
-    basins[..].select_nth_unstable_by(3, |a, b| b.cmp(a)); // reverse sort
-    let product: usize = basins.iter().take(3).product();
-    println!("Part 2: {}", product);
+    fn part_2(&self) -> Option<usize> {
+        let mut basins: Vec<_> = low_points(&self.input)
+            .iter()
+            .map(|point| basin_size(&self.input, *point))
+            .collect();
+        basins[..].select_nth_unstable_by(3, |a, b| b.cmp(a)); // reverse sort
+        let product: usize = basins.iter().take(3).product();
+        Some(product)
+    }
 }
 
 fn low_points(input: &Array2<usize>) -> Vec<(usize, usize)> {

@@ -1,3 +1,5 @@
+mod solutions;
+
 pub mod prelude {
     use std::error::Error;
     use std::ffi::OsString;
@@ -44,5 +46,19 @@ pub mod prelude {
             .collect::<Result<Vec<_>, _>>()?
             .into_iter();
         Ok(lines)
+    }
+
+    pub trait Day {
+        fn part_1(&self) -> Option<usize>;
+        fn part_2(&self) -> Option<usize>;
+    }
+
+    pub fn run_solutions(day: DayNum) -> Result<(), AOCError> {
+        super::solutions::dispatch(day)
+    }
+
+    pub enum DayNum {
+        One(usize, OsString),
+        All,
     }
 }
