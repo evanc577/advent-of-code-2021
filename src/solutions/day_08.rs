@@ -1,7 +1,6 @@
-use std::cmp::Ordering;
+use std::collections::HashSet;
 
 use crate::prelude::*;
-use itertools::Itertools;
 
 pub struct Day08 {
     input: Vec<Entry>,
@@ -47,96 +46,85 @@ impl Day for Day08 {
     }
 
     fn part_2(&self) -> Option<usize> {
-        use WireSegment::*;
-        const ALL_WIRESEGMENTS: [WireSegment; 7] = [A, B, C, D, E, F, G];
-
         // Sum results of all lines
         let sum: usize = self
             .input
             .iter()
             .map(|entry| {
-                let patterns: Vec<_> = entry
-                    .signals
-                    .iter()
-                    .chain(entry.outputs.iter())
-                    .cloned()
-                    .collect();
+                let mut digits = Vec::new();
+                digits.resize_with(10, || None);
+                let mut remaining = vec![];
 
-                // Loop over all possible permutations
-                'permutation_loop: for permutation in
-                    ALL_WIRESEGMENTS.iter().permutations(ALL_WIRESEGMENTS.len())
-                {
-                    // Check if permutation results in a valid mapping
-                    for pattern in &patterns {
-                        let mapped_pattern = map_pattern(&permutation[..], &pattern.0);
-                        if segments_to_digit(&mapped_pattern[..]).is_none() {
-                            continue 'permutation_loop;
+                let signal_sets: Vec<HashSet<_>> =
+                    entry.signals.iter().map(|p| p.0.iter().collect()).collect();
+                let output_sets: Vec<HashSet<_>> =
+                    entry.outputs.iter().map(|p| p.0.iter().collect()).collect();
+
+                // Find easy digits (1, 4, 7, 8)
+                for (i, pattern) in entry.signals.iter().enumerate() {
+                    match pattern.0.len() {
+                        2 => digits[1] = Some(&signal_sets[i]),
+                        3 => digits[7] = Some(&signal_sets[i]),
+                        4 => digits[4] = Some(&signal_sets[i]),
+                        7 => digits[8] = Some(&signal_sets[i]),
+                        _ => remaining.push((i, &pattern.0)),
+                    }
+                }
+
+                if let (Some(segs_1), Some(segs_4)) = (digits[1], digits[4]) {
+                    // Segments that are in the "elbow" of 4
+                    let diff_4: HashSet<_> = segs_4.difference(segs_1).copied().collect();
+
+                    // Find hard digits
+                    for (i, pattern) in remaining {
+                        match pattern.len() {
+                            5 => {
+                                if segs_1.is_subset(&signal_sets[i]) {
+                                    digits[3] = Some(&signal_sets[i]);
+                                } else if diff_4.is_subset(&signal_sets[i]) {
+                                    digits[5] = Some(&signal_sets[i]);
+                                } else {
+                                    digits[2] = Some(&signal_sets[i]);
+                                }
+                            }
+                            6 => {
+                                if segs_4.is_subset(&signal_sets[i]) {
+                                    digits[9] = Some(&signal_sets[i]);
+                                } else if diff_4.is_subset(&signal_sets[i]) {
+                                    digits[6] = Some(&signal_sets[i]);
+                                } else {
+                                    digits[0] = Some(&signal_sets[i]);
+                                }
+                            }
+                            _ => return 0,
                         }
                     }
 
-                    // compute output digits
-                    let num = entry
-                        .outputs
-                        .iter()
-                        .filter_map(|p| {
-                            let mapped_pattern = map_pattern(&permutation[..], &p.0);
-                            segments_to_digit(&mapped_pattern)
-                        })
-                        .reduce(|acc, x| 10 * acc + x)
-                        .unwrap_or(0);
-                    return num;
-                }
+                    // Calculate output values
+                    let num = output_sets.iter().try_fold(0, |acc, x| {
+                        let found = digits.iter().enumerate().find(|(_, s)| {
+                            if let Some(s) = s {
+                                x == *s
+                            } else {
+                                false
+                            }
+                        });
+                        if let Some((d, _)) = found {
+                            Some(10 * acc + d)
+                        } else {
+                            None
+                        }
+                    });
 
-                // No mapping found? Just return 0
-                0
+                    num.unwrap_or(0)
+                } else {
+                    0
+                }
             })
             .sum();
+
         Some(sum)
     }
-}
-
-fn map_pattern(permutation: &[&WireSegment], pattern: &[WireSegment]) -> Vec<WireSegment> {
-    pattern
-        .iter()
-        .map(|x| permutation[x.to_idx()])
-        .cloned()
-        .collect()
-}
-
-fn segments_to_digit(segments: &[WireSegment]) -> Option<usize> {
-    #[rustfmt::skip]
-    const SEGMENT_DIGIT_TABLE: [[bool; 7]; 10] = [
-        // a      b      c      d      e      f      g
-        [true , true , true , false, true , true , true ], // 0
-        [false, false, true , false, false, true , false], // 1
-        [true , false, true , true , true , false, true ], // 2
-        [true , false, true , true , false, true , true ], // 3
-        [false, true , true , true , false, true , false], // 4
-        [true , true , false, true , false, true , true ], // 5
-        [true , true , false, true , true , true , true ], // 6
-        [true , false, true , false, false, true , false], // 7
-        [true , true , true , true , true , true , true ], // 8
-        [true , true , true , true , false, true , true ], // 9
-    ];
-
-    let mut input_segs: [bool; 7] = [false; 7];
-    for seg in segments {
-        input_segs[seg.to_idx()] = true;
-    }
-
-    for (i, digit_segs) in SEGMENT_DIGIT_TABLE.iter().enumerate() {
-        if digit_segs
-            .iter()
-            .zip(input_segs.iter())
-            .map(|(a, b)| a.cmp(b))
-            .all(|c| c == Ordering::Equal)
-            && digit_segs.len() == input_segs.len()
-        {
-            return Some(i);
-        }
-    }
-
-    None
 }
 
 #[derive(Debug)]
@@ -158,7 +146,7 @@ impl FromIterator<WireSegment> for Pattern {
     }
 }
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, Debug)]
 enum WireSegment {
     A,
     B,
@@ -167,20 +155,6 @@ enum WireSegment {
     E,
     F,
     G,
-}
-
-impl WireSegment {
-    fn to_idx(self) -> usize {
-        match self {
-            Self::A => 0,
-            Self::B => 1,
-            Self::C => 2,
-            Self::D => 3,
-            Self::E => 4,
-            Self::F => 5,
-            Self::G => 6,
-        }
-    }
 }
 
 impl From<char> for WireSegment {
@@ -202,7 +176,8 @@ impl From<char> for WireSegment {
 mod test {
     use super::*;
 
-    const INPUT: &str = "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
+    const INPUT: &str =
+        "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe
 edbfga begcd cbg gc gcadebf fbgde acbgfd abcde gfcbed gfec | fcgedb cgb dgebacf gc
 fgaebd cg bdaec gdafb agbcfd gdcbef bgcad gfac gcb cdgabef | cg cg fdcagb cbg
 fbegcd cbd adcefb dageb afcb bc aefdc ecdab fgdeca fcdbega | efabcd cedba gadfec cb
