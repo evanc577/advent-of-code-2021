@@ -1,5 +1,5 @@
 use crate::prelude::*;
-use ndarray::Array2;
+use ndarray::{Array2, Axis};
 
 pub struct Day03 {
     input: Array2<Bit>,
@@ -15,7 +15,7 @@ impl Day for Day03 {
     fn part_1(&self) -> Option<usize> {
         let gamma: BinaryNumber = self
             .input
-            .axis_iter(ndarray::Axis(1))
+            .axis_iter(Axis(1))
             .map(|col| {
                 let zeros = col.iter().filter(|&&v| v == Bit::Zero).count();
                 let ones = col.len() - zeros;
@@ -37,10 +37,10 @@ impl Day for Day03 {
     }
 }
 
-fn parse_input(input: impl Iterator<Item = String>) -> Result<ndarray::Array2<Bit>, AOCError> {
+fn parse_input(input: impl Iterator<Item = String>) -> Result<Array2<Bit>, AOCError> {
     let input_lines: Vec<_> = input.collect();
     let num_bits = input_lines[0].len();
-    let mut arr = ndarray::Array2::default((input_lines.len(), num_bits));
+    let mut arr = Array2::default((input_lines.len(), num_bits));
     for (i, n) in input_lines.iter().enumerate() {
         for (j, c) in n.chars().enumerate() {
             arr[[i, j]] = c.into();
@@ -50,11 +50,11 @@ fn parse_input(input: impl Iterator<Item = String>) -> Result<ndarray::Array2<Bi
 }
 
 fn part_02_helper(
-    mut input: ndarray::Array2<Bit>,
+    mut input: Array2<Bit>,
     pred: &dyn Fn(usize, usize) -> bool,
 ) -> BinaryNumber {
     for j in 0..input.shape()[1] {
-        let col = input.index_axis(ndarray::Axis(1), j);
+        let col = input.index_axis(Axis(1), j);
         let zeros = col.iter().filter(|&&v| v == Bit::Zero).count();
         let ones = col.len() - zeros;
 
@@ -66,7 +66,7 @@ fn part_02_helper(
 
         for i in (0..input.shape()[0]).rev() {
             if remove_pred(input[[i, j]]) {
-                input.remove_index(ndarray::Axis(0), i);
+                input.remove_index(Axis(0), i);
             }
         }
 
@@ -80,7 +80,7 @@ fn part_02_helper(
     }
 
     input
-        .index_axis(ndarray::Axis(0), 0)
+        .index_axis(Axis(0), 0)
         .iter()
         .copied()
         .collect()

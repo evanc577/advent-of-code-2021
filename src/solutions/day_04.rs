@@ -2,6 +2,7 @@ use std::fmt;
 
 use crate::prelude::*;
 use itertools::Itertools;
+use ndarray::{Array2, Axis};
 
 pub struct Day04 {
     input: BingoInput,
@@ -69,7 +70,7 @@ fn parse_input(input: impl Iterator<Item = String>) -> Result<BingoInput, AOCErr
         .chunks(6)
         .into_iter()
         .map(|chunk| {
-            let mut board: ndarray::Array2<BingoCell> = ndarray::Array2::default((5, 5));
+            let mut board: Array2<BingoCell> = Array2::default((5, 5));
             // Parse one board
             for (i, line) in chunk.skip(1).take(5).enumerate() {
                 // Parse one line
@@ -106,13 +107,13 @@ struct BingoInput {
 
 #[derive(Clone)]
 struct BingoBoard {
-    data: ndarray::Array2<BingoCell>,
+    data: Array2<BingoCell>,
     last_value: usize,
     state: GameState,
 }
 
 impl BingoBoard {
-    fn new(board: ndarray::Array2<BingoCell>) -> Self {
+    fn new(board: Array2<BingoCell>) -> Self {
         Self {
             data: board,
             last_value: 0,
@@ -125,8 +126,8 @@ impl BingoBoard {
             return true;
         }
 
-        let row = self.data.index_axis(ndarray::Axis(0), i);
-        let col = self.data.index_axis(ndarray::Axis(1), j);
+        let row = self.data.index_axis(Axis(0), i);
+        let col = self.data.index_axis(Axis(1), j);
 
         if row.iter().all(|cell| cell.marked) {
             return true;
