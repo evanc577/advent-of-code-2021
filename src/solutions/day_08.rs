@@ -55,19 +55,14 @@ impl Day for Day08 {
                 digits.resize_with(10, || None);
                 let mut remaining = vec![];
 
-                let signal_sets: Vec<HashSet<_>> =
-                    entry.signals.iter().map(|p| p.0.iter().collect()).collect();
-                let output_sets: Vec<HashSet<_>> =
-                    entry.outputs.iter().map(|p| p.0.iter().collect()).collect();
-
                 // Find easy digits (1, 4, 7, 8)
-                for (i, pattern) in entry.signals.iter().enumerate() {
+                for pattern in entry.signals.iter() {
                     match pattern.0.len() {
-                        2 => digits[1] = Some(&signal_sets[i]),
-                        3 => digits[7] = Some(&signal_sets[i]),
-                        4 => digits[4] = Some(&signal_sets[i]),
-                        7 => digits[8] = Some(&signal_sets[i]),
-                        _ => remaining.push((i, &pattern.0)),
+                        2 => digits[1] = Some(&pattern.0),
+                        3 => digits[7] = Some(&pattern.0),
+                        4 => digits[4] = Some(&pattern.0),
+                        7 => digits[8] = Some(&pattern.0),
+                        _ => remaining.push(&pattern.0),
                     }
                 }
 
@@ -76,24 +71,24 @@ impl Day for Day08 {
                     let diff_4: HashSet<_> = segs_4.difference(segs_1).copied().collect();
 
                     // Find hard digits
-                    for (i, pattern) in remaining {
-                        match pattern.len() {
+                    for pattern_set in remaining {
+                        match pattern_set.len() {
                             5 => {
-                                if segs_1.is_subset(&signal_sets[i]) {
-                                    digits[3] = Some(&signal_sets[i]);
-                                } else if diff_4.is_subset(&signal_sets[i]) {
-                                    digits[5] = Some(&signal_sets[i]);
+                                if segs_1.is_subset(pattern_set) {
+                                    digits[3] = Some(pattern_set);
+                                } else if diff_4.is_subset(pattern_set) {
+                                    digits[5] = Some(pattern_set);
                                 } else {
-                                    digits[2] = Some(&signal_sets[i]);
+                                    digits[2] = Some(pattern_set);
                                 }
                             }
                             6 => {
-                                if segs_4.is_subset(&signal_sets[i]) {
-                                    digits[9] = Some(&signal_sets[i]);
-                                } else if diff_4.is_subset(&signal_sets[i]) {
-                                    digits[6] = Some(&signal_sets[i]);
+                                if segs_4.is_subset(pattern_set) {
+                                    digits[9] = Some(pattern_set);
+                                } else if diff_4.is_subset(pattern_set) {
+                                    digits[6] = Some(pattern_set);
                                 } else {
-                                    digits[0] = Some(&signal_sets[i]);
+                                    digits[0] = Some(pattern_set);
                                 }
                             }
                             _ => return 0,
@@ -101,10 +96,10 @@ impl Day for Day08 {
                     }
 
                     // Calculate output values
-                    let num = output_sets.iter().try_fold(0, |acc, x| {
+                    let num = entry.outputs.iter().try_fold(0, |acc, x| {
                         let found = digits.iter().enumerate().find(|(_, s)| {
                             if let Some(s) = s {
-                                x == *s
+                                x.0 == **s
                             } else {
                                 false
                             }
@@ -134,13 +129,13 @@ struct Entry {
 }
 
 #[derive(Clone, Debug)]
-struct Pattern(Vec<WireSegment>);
+struct Pattern(HashSet<WireSegment>);
 
 impl FromIterator<WireSegment> for Pattern {
     fn from_iter<T: IntoIterator<Item = WireSegment>>(iter: T) -> Self {
-        let mut c = Self(Vec::new());
+        let mut c = Self(HashSet::new());
         for i in iter {
-            c.0.push(i);
+            c.0.insert(i);
         }
         c
     }
