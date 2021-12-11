@@ -1,6 +1,7 @@
 mod solutions;
 
 pub mod prelude {
+    use std::collections::BTreeMap;
     use std::error::Error;
     use std::ffi::OsString;
     use std::fmt;
@@ -53,7 +54,7 @@ pub mod prelude {
         fn part_2(&self) -> Option<usize>;
     }
 
-    pub fn run_solutions(day: DayNum) -> Result<(), AOCError> {
+    pub fn run_solutions(day: DayNum) -> Result<BTreeMap<usize, Vec<Option<usize>>>, AOCError> {
         super::solutions::dispatch(day)
     }
 

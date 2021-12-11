@@ -33,7 +33,8 @@ fn run() -> Result<(), AOCError> {
             match day_str.to_string_lossy().parse::<usize>() {
                 Ok(d) => {
                     let input_path = matches
-                        .value_of_os("input").map(|s| s.to_owned())
+                        .value_of_os("input")
+                        .map(|s| s.to_owned())
                         .unwrap_or_else(|| OsString::from(format!("input/day_{:02}.txt", d)));
                     DayNum::One(d, input_path)
                 }
@@ -42,5 +43,16 @@ fn run() -> Result<(), AOCError> {
         }
     };
 
-    run_solutions(day)
+    for (day, solution) in run_solutions(day)? {
+        for (part, part_solution) in solution.iter().enumerate() {
+            let solution_text = match part_solution {
+                Some(x) => x.to_string(),
+                None => "No solution".into(),
+            };
+
+            println!("Day {:2} Part {}: {}", day, part + 1, solution_text);
+        }
+    }
+
+    Ok(())
 }

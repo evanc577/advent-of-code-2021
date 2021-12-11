@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::path::Path;
 
 use crate::prelude::*;
@@ -14,20 +15,27 @@ mod day_09;
 mod day_10;
 mod day_11;
 
-pub fn dispatch(day: DayNum) -> Result<(), AOCError> {
+pub fn dispatch(day: DayNum) -> Result<BTreeMap<usize, Vec<Option<usize>>>, AOCError> {
+    let mut ret = BTreeMap::new();
     match day {
-        DayNum::One(d, i) => run_one_solution(d, i),
+        DayNum::One(d, i) => {
+            ret.insert(d, run_one_solution(d, i)?);
+        }
         DayNum::All => {
             for d in 1..=11 {
                 let input_path = format!("input/day_{:02}.txt", d);
-                run_one_solution(d, input_path)?;
+                ret.insert(d, run_one_solution(d, input_path)?);
             }
-            Ok(())
         }
     }
+
+    Ok(ret)
 }
 
-fn run_one_solution(day: usize, input_path: impl AsRef<Path>) -> Result<(), AOCError> {
+fn run_one_solution(
+    day: usize,
+    input_path: impl AsRef<Path>,
+) -> Result<Vec<Option<usize>>, AOCError> {
     let input = read_input_lines(input_path)?;
     let runner = match day {
         1 => day_01::new(input)?,
@@ -44,17 +52,5 @@ fn run_one_solution(day: usize, input_path: impl AsRef<Path>) -> Result<(), AOCE
         _ => unimplemented!(),
     };
 
-    let solution_1 = match runner.part_1() {
-        Some(x) => x.to_string(),
-        None => "No solution".into(),
-    };
-    let solution_2 = match runner.part_2() {
-        Some(x) => x.to_string(),
-        None => "No solution".into(),
-    };
-
-    println!("Day {} Part 1: {}", day, solution_1);
-    println!("Day {} Part 2: {}", day, solution_2);
-
-    Ok(())
+    Ok(vec![runner.part_1(), runner.part_2()])
 }
