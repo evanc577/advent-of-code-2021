@@ -23,7 +23,7 @@ impl Day for Day12 {
         let adj = generate_adjacency(&self.input);
         do_dfs(adj, &|v| {
             !v.iter()
-                .any(|(&c, &x)| c.class == CaveClass::Small && x > 1)
+                .any(|(&c, &x)| matches!(c, Cave::Small(_)) && x > 1)
         })
     }
 }
@@ -32,12 +32,8 @@ fn do_dfs(
     adj: HashMap<&Cave, Vec<&Cave>>,
     small_criteria: &(dyn Sync + Fn(&HashMap<&Cave, usize>) -> bool),
 ) -> Option<usize> {
-    let start = Cave {
-        id: "start".into(),
-        class: CaveClass::Start,
-    };
     let mut stacks: Vec<(_, Stack)> = adj
-        .get(&start)?
+        .get(&Cave::Start)?
         .iter()
         .map(|&c| (0, Stack::new(c)))
         .collect();
@@ -48,16 +44,16 @@ fn do_dfs(
             // DFS
             while let Some((cave, mut visited)) = stack.0.pop() {
                 if visited.get(cave).is_none()
-                    || cave.class == CaveClass::Big
-                    || cave.class == CaveClass::Small && small_criteria(&visited)
+                    || matches!(cave, Cave::Big(_))
+                    || matches!(cave, Cave::Small(_)) && small_criteria(&visited)
                 {
                     visited.entry(cave).and_modify(|v| *v += 1).or_insert(1);
                     if let Some(next_caves) = adj.get(cave) {
                         for next_cave in next_caves {
-                            match next_cave.class {
-                                CaveClass::End => count += 1,
-                                CaveClass::Start => (),
-                                CaveClass::Big | CaveClass::Small => {
+                            match next_cave {
+                                Cave::Start => (),
+                                Cave::End => count += 1,
+                                Cave::Big(_) | Cave::Small(_) => {
                                     stack.0.push((next_cave, visited.clone()))
                                 }
                             }
@@ -87,42 +83,28 @@ impl FromStr for Path {
 }
 
 #[derive(Clone, PartialEq, Eq, Hash, Debug)]
-struct Cave {
-    id: String,
-    class: CaveClass,
+enum Cave {
+    Start,
+    End,
+    Big(String),
+    Small(String),
 }
 
 impl FromStr for Cave {
     type Err = AOCError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        let id = s.into();
         if s == "start" {
-            Ok(Self {
-                id,
-                class: CaveClass::Start,
-            })
+            Ok(Self::Start)
         } else if s == "end" {
-            Ok(Self {
-                id,
-                class: CaveClass::End,
-            })
+            Ok(Self::End)
         } else {
-            let class = match s.chars().all(|c| c.is_lowercase()) {
-                true => CaveClass::Small,
-                false => CaveClass::Big,
-            };
-            Ok(Self { id, class })
+            match s.chars().all(|c| c.is_lowercase()) {
+                true => Ok(Self::Small(s.into())),
+                false => Ok(Self::Big(s.into())),
+            }
         }
     }
-}
-
-#[derive(Clone, PartialEq, Eq, Hash, Debug)]
-enum CaveClass {
-    Start,
-    End,
-    Big,
-    Small,
 }
 
 struct Stack<'a>(Vec<(&'a Cave, HashMap<&'a Cave, usize>)>);
@@ -136,10 +118,10 @@ impl<'a> Stack<'a> {
 fn generate_adjacency(paths: &[Path]) -> HashMap<&Cave, Vec<&Cave>> {
     let mut map = HashMap::new();
     for path in paths {
-        if path.1.class != CaveClass::Start {
+        if path.1 != Cave::Start {
             map.entry(&path.0).or_insert_with(Vec::new).push(&path.1);
         }
-        if path.0.class != CaveClass::Start {
+        if path.0 != Cave::Start {
             map.entry(&path.1).or_insert_with(Vec::new).push(&path.0);
         }
     }
