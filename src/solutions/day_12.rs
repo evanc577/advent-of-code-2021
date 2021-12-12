@@ -16,22 +16,22 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 impl Day for Day12 {
     fn part_1(&self) -> Option<usize> {
         let adj = generate_adjacency(&self.input);
-        do_dfs(adj, &|_| false)
+        do_dfs(adj, |_| false)
     }
 
     fn part_2(&self) -> Option<usize> {
         let adj = generate_adjacency(&self.input);
-        do_dfs(adj, &|v| {
+        do_dfs(adj, |v| {
             !v.iter()
                 .any(|(&c, &x)| matches!(c, Cave::Small(_)) && x > 1)
         })
     }
 }
 
-fn do_dfs(
-    adj: HashMap<&Cave, Vec<&Cave>>,
-    small_criteria: &(dyn Sync + Fn(&HashMap<&Cave, usize>) -> bool),
-) -> Option<usize> {
+fn do_dfs<F>(adj: HashMap<&Cave, Vec<&Cave>>, small_criteria: F) -> Option<usize>
+where
+    F: Sync + Fn(&HashMap<&Cave, usize>) -> bool,
+{
     let mut stacks: Vec<Stack> = adj
         .get(&Cave::Start)?
         .iter()

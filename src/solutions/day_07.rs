@@ -16,17 +16,20 @@ pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCE
 
 impl Day for Day07 {
     fn part_1(&self) -> Option<usize> {
-        let fuel = calculate(&self.input, &|a, b| abs_diff(a, b));
+        let fuel = calculate(&self.input, abs_diff);
         Some(fuel)
     }
 
     fn part_2(&self) -> Option<usize> {
-        let fuel = calculate(&self.input, &|a, b| triangular(abs_diff(a, b)));
+        let fuel = calculate(&self.input, |a, b| triangular(abs_diff(a, b)));
         Some(fuel)
     }
 }
 
-fn calculate(input: &[usize], f: &dyn Fn(usize, usize) -> usize) -> usize {
+fn calculate<F>(input: &[usize], f: F) -> usize
+where
+    F: Fn(usize, usize) -> usize,
+{
     let max = *input.iter().max().unwrap_or(&0);
     let min = *input.iter().min().unwrap_or(&0);
 

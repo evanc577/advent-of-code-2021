@@ -37,13 +37,16 @@ impl Day for Day03 {
     }
 
     fn part_2(&self) -> Option<usize> {
-        let o2 = part_02_helper(self.input.clone(), &|zeros, ones| ones >= zeros);
-        let co2 = part_02_helper(self.input.clone(), &|zeros, ones| zeros > ones);
+        let o2 = part_02_helper(self.input.clone(), |zeros, ones| ones >= zeros);
+        let co2 = part_02_helper(self.input.clone(), |zeros, ones| zeros > ones);
         Some(o2.to_usize() * co2.to_usize())
     }
 }
 
-fn part_02_helper(mut input: Array2<Bit>, pred: &dyn Fn(usize, usize) -> bool) -> BinaryNumber {
+fn part_02_helper<F>(mut input: Array2<Bit>, pred: F) -> BinaryNumber
+where
+    F: Fn(usize, usize) -> bool,
+{
     for j in 0..input.shape()[1] {
         let col = input.index_axis(Axis(1), j);
         let zeros = col.iter().filter(|&&v| v == Bit::Zero).count();
