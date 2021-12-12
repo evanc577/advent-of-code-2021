@@ -49,7 +49,7 @@ pub fn get_runner(
         9 => day_09::new(input)?,
         10 => day_10::new(input)?,
         11 => day_11::new(input)?,
-        _ => unimplemented!(),
+        _ => return Err(AOCError::DayOutOfRange(day)),
     };
     Ok(runner)
 }
