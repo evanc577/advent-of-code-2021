@@ -19,6 +19,7 @@ dependencies = [
  "criterion",
  "itertools",
  "ndarray",
+ "rayon",
 ]
 
 [[package]]

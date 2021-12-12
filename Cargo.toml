@@ -12,6 +12,7 @@ clap = "2.34"
 criterion = { version = "0.3", features = [ "html_reports" ] }
 itertools = "0.10"
 ndarray = "0.15"
+rayon = "1.5"
 
 [[bench]]
 name = "benchmark"
