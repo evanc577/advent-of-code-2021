@@ -14,6 +14,7 @@ mod day_08;
 mod day_09;
 mod day_10;
 mod day_11;
+mod day_12;
 
 pub fn dispatch(day: DayNum) -> Result<BTreeMap<usize, Vec<Option<usize>>>, AOCError> {
     let mut ret = BTreeMap::new();
@@ -49,6 +50,7 @@ pub fn get_runner(
         9 => day_09::new(input)?,
         10 => day_10::new(input)?,
         11 => day_11::new(input)?,
+        12 => day_12::new(input)?,
         _ => return Err(AOCError::DayOutOfRange(day)),
     };
     Ok(runner)
