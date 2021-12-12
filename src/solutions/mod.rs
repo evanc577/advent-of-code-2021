@@ -56,6 +56,6 @@ pub fn get_runner(
     Ok(runner)
 }
 
-pub fn run(runner: Box<dyn Day>) -> Result<Vec<Option<usize>>, AOCError> {
+fn run(runner: Box<dyn Day>) -> Result<Vec<Option<usize>>, AOCError> {
     Ok(vec![runner.part_1(), runner.part_2()])
 }
