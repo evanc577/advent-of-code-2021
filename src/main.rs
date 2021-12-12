@@ -1,4 +1,4 @@
-use std::ffi::OsString;
+use std::ffi::{OsString, OsStr};
 use std::process::exit;
 
 use aoc2021::prelude::*;
@@ -19,14 +19,13 @@ fn run() -> Result<(), AOCError> {
         .arg(
             Arg::with_name("day")
                 .help("Advent of code day")
-                .required(true)
                 .index(1),
         )
         .arg(Arg::with_name("input").help("Input file to use").index(2))
         .get_matches();
 
     let day = {
-        let day_str = matches.value_of_os("day").unwrap();
+        let day_str = matches.value_of_os("day").unwrap_or_else(|| OsStr::new("all"));
         if day_str == "all" {
             DayNum::All
         } else {
