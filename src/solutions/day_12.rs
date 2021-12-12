@@ -32,17 +32,18 @@ fn do_dfs(
     adj: HashMap<&Cave, Vec<&Cave>>,
     small_criteria: &(dyn Sync + Fn(&HashMap<&Cave, usize>) -> bool),
 ) -> Option<usize> {
-    let mut stacks: Vec<(_, Stack)> = adj
+    let mut stacks: Vec<Stack> = adj
         .get(&Cave::Start)?
         .iter()
-        .map(|&c| (0, Stack::new(c)))
+        .map(|&c| Stack::new(c))
         .collect();
 
     let count = stacks
         .par_iter_mut()
-        .map(|(mut count, stack)| {
+        .map(|stack| {
             // DFS
-            while let Some((cave, mut visited)) = stack.0.pop() {
+            let mut count = 0;
+            while let Some((cave, mut visited)) = stack.pop() {
                 if visited.get(cave).is_none()
                     || matches!(cave, Cave::Big(_))
                     || matches!(cave, Cave::Small(_)) && small_criteria(&visited)
@@ -54,7 +55,7 @@ fn do_dfs(
                                 Cave::Start => (),
                                 Cave::End => count += 1,
                                 Cave::Big(_) | Cave::Small(_) => {
-                                    stack.0.push((next_cave, visited.clone()))
+                                    stack.push((next_cave, visited.clone()))
                                 }
                             }
                         }
@@ -107,11 +108,21 @@ impl FromStr for Cave {
     }
 }
 
-struct Stack<'a>(Vec<(&'a Cave, HashMap<&'a Cave, usize>)>);
+type StackValue<'a> = (&'a Cave, HashMap<&'a Cave, usize>);
+
+struct Stack<'a>(Vec<StackValue<'a>>);
 
 impl<'a> Stack<'a> {
     fn new(cave: &'a Cave) -> Self {
         Self(vec![(cave, HashMap::new())])
+    }
+
+    fn push(&mut self, value: StackValue<'a>) {
+        self.0.push(value);
+    }
+
+    fn pop(&mut self) -> Option<StackValue<'a>> {
+        self.0.pop()
     }
 }
 
