@@ -58,37 +58,37 @@ impl Day for Day08 {
                 // Find easy digits (1, 4, 7, 8)
                 for pattern in entry.signals.iter() {
                     match pattern.0.len() {
-                        2 => digits[1] = Some(&pattern.0),
-                        3 => digits[7] = Some(&pattern.0),
-                        4 => digits[4] = Some(&pattern.0),
-                        7 => digits[8] = Some(&pattern.0),
-                        _ => remaining.push(&pattern.0),
+                        2 => digits[1] = Some(pattern),
+                        3 => digits[7] = Some(pattern),
+                        4 => digits[4] = Some(pattern),
+                        7 => digits[8] = Some(pattern),
+                        _ => remaining.push(pattern),
                     }
                 }
 
                 if let (Some(segs_1), Some(segs_4)) = (digits[1], digits[4]) {
                     // Segments that are in the "elbow" of 4
-                    let diff_4: HashSet<_> = segs_4.difference(segs_1).copied().collect();
+                    let diff_4: HashSet<_> = segs_4.0.difference(&segs_1.0).copied().collect();
 
                     // Find hard digits
-                    for pattern_set in remaining {
-                        match pattern_set.len() {
+                    for pattern in remaining {
+                        match pattern.0.len() {
                             5 => {
-                                if segs_1.is_subset(pattern_set) {
-                                    digits[3] = Some(pattern_set);
-                                } else if diff_4.is_subset(pattern_set) {
-                                    digits[5] = Some(pattern_set);
+                                if segs_1.0.is_subset(&pattern.0) {
+                                    digits[3] = Some(pattern);
+                                } else if diff_4.is_subset(&pattern.0) {
+                                    digits[5] = Some(pattern);
                                 } else {
-                                    digits[2] = Some(pattern_set);
+                                    digits[2] = Some(pattern);
                                 }
                             }
                             6 => {
-                                if segs_4.is_subset(pattern_set) {
-                                    digits[9] = Some(pattern_set);
-                                } else if diff_4.is_subset(pattern_set) {
-                                    digits[6] = Some(pattern_set);
+                                if segs_4.0.is_subset(&pattern.0) {
+                                    digits[9] = Some(pattern);
+                                } else if diff_4.is_subset(&pattern.0) {
+                                    digits[6] = Some(pattern);
                                 } else {
-                                    digits[0] = Some(pattern_set);
+                                    digits[0] = Some(pattern);
                                 }
                             }
                             _ => return 0,
@@ -99,7 +99,7 @@ impl Day for Day08 {
                     let num = entry.outputs.iter().try_fold(0, |acc, x| {
                         let found = digits.iter().enumerate().find(|(_, s)| {
                             if let Some(s) = s {
-                                x.0 == **s
+                                x.0 == s.0
                             } else {
                                 false
                             }
