@@ -54,13 +54,13 @@ mod test {
     const INPUT: &str = "3,4,3,1,2";
 
     #[test]
-    fn test_part_1() {
+    fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Some(5934));
     }
 
     #[test]
-    fn test_part_2() {
+    fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Some(26984457539));
     }
