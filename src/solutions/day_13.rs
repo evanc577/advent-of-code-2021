@@ -37,7 +37,6 @@ impl Day for Day13 {
         for fold in &self.folds {
             paper = do_fold(&paper, fold);
         }
-        dbg!(&paper);
         let mut buf = Vec::new();
         let _ = write!(buf, "{}", paper);
         Answer::Printable(buf)
