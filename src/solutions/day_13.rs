@@ -24,11 +24,10 @@ pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCE
 
 impl Day for Day13 {
     fn part_1(&self) -> Answer {
-        let paper = Paper::from_dots(&self.dots[..]);
         self.folds
             .get(0)
             .as_ref()
-            .map(|fold| do_fold(&paper, *fold).num_dots())
+            .map(|fold| do_fold(&Paper::from_dots(&self.dots[..]), *fold).num_dots())
             .into()
     }
 
