@@ -24,7 +24,7 @@ pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCE
 
 impl Day for Day13 {
     fn part_1(&self) -> Answer {
-        let paper = Paper::new(&self.dots[..]);
+        let paper = Paper::from_dots(&self.dots[..]);
         self.folds
             .get(0)
             .as_ref()
@@ -33,10 +33,12 @@ impl Day for Day13 {
     }
 
     fn part_2(&self) -> Answer {
-        let mut paper = Paper::new(&self.dots[..]);
-        for fold in &self.folds {
-            paper = do_fold(&paper, fold);
-        }
+        let paper = self
+            .folds
+            .iter()
+            .fold(Paper::from_dots(&self.dots[..]), |acc, fold| {
+                do_fold(&acc, fold)
+            });
         let mut buf = Vec::new();
         let _ = write!(buf, "{}", paper);
         Answer::Printable(buf)
@@ -73,7 +75,11 @@ fn do_fold(paper: &Paper, fold: &Fold) -> Paper {
 struct Paper(HashSet<Dot>);
 
 impl Paper {
-    fn new(dots: &[Dot]) -> Self {
+    fn new() -> Self {
+        Self(HashSet::new())
+    }
+
+    fn from_dots(dots: &[Dot]) -> Self {
         Self(dots.iter().cloned().collect())
     }
 
@@ -130,7 +136,7 @@ impl DerefMut for Paper {
 
 impl FromIterator<Dot> for Paper {
     fn from_iter<T: IntoIterator<Item = Dot>>(iter: T) -> Self {
-        let mut paper = Paper::new(&[]);
+        let mut paper = Paper::new();
         for dot in iter {
             paper.insert(dot);
         }
