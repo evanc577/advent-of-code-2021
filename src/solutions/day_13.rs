@@ -71,6 +71,7 @@ fn do_fold(paper: &Paper, fold: &Fold) -> Paper {
     new_set
 }
 
+#[derive(Debug)]
 struct Paper(HashSet<Dot>);
 
 impl Paper {
@@ -110,12 +111,6 @@ impl fmt::Display for Paper {
             }
         }
         write!(f, "")
-    }
-}
-
-impl fmt::Debug for Paper {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{}", self)
     }
 }
 
