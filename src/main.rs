@@ -45,8 +45,9 @@ fn run() -> Result<(), AOCError> {
     for (day, solution) in run_solutions(day)? {
         for (part, part_solution) in solution.iter().enumerate() {
             let solution_text = match part_solution {
-                Some(x) => x.to_string(),
-                None => "No solution".into(),
+                Answer::Integer(x) => x.to_string(),
+                Answer::None => "No solution".into(),
+                Answer::Printable(x) => String::from_utf8_lossy(x).into(),
             };
 
             println!("Day {:2} Part {}: {}", day, part + 1, solution_text);

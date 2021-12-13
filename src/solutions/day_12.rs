@@ -14,17 +14,17 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day12 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let adj = generate_adjacency(&self.input);
-        do_dfs(adj, |_| false)
+        do_dfs(adj, |_| false).into()
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let adj = generate_adjacency(&self.input);
         do_dfs(adj, |v| {
             !v.iter()
                 .any(|(&c, &x)| matches!(c, Cave::Small(_)) && x > 1)
-        })
+        }).into()
     }
 }
 
@@ -154,12 +154,12 @@ b-end";
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(10));
+        assert_eq!(runner.part_1(), Answer::Integer(10));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(36));
+        assert_eq!(runner.part_2(), Answer::Integer(36));
     }
 }

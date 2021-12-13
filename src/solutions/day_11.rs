@@ -25,12 +25,12 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day11 {
-    fn part_1(&self) -> Option<usize> {
-        Some(simulate(&self.input, EndCondition::Step(100)))
+    fn part_1(&self) -> Answer {
+        Answer::Integer(simulate(&self.input, EndCondition::Step(100)))
     }
 
-    fn part_2(&self) -> Option<usize> {
-        Some(simulate(&self.input, EndCondition::Synchronized))
+    fn part_2(&self) -> Answer {
+        Answer::Integer(simulate(&self.input, EndCondition::Synchronized))
     }
 }
 
@@ -145,12 +145,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(1656));
+        assert_eq!(runner.part_1(), Answer::Integer(1656));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(195));
+        assert_eq!(runner.part_2(), Answer::Integer(195));
     }
 }

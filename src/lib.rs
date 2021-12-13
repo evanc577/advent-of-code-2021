@@ -50,11 +50,27 @@ pub mod prelude {
     }
 
     pub trait Day {
-        fn part_1(&self) -> Option<usize>;
-        fn part_2(&self) -> Option<usize>;
+        fn part_1(&self) -> Answer;
+        fn part_2(&self) -> Answer;
     }
 
-    pub fn run_solutions(day: DayNum) -> Result<BTreeMap<usize, Vec<Option<usize>>>, AOCError> {
+    #[derive(Clone, PartialEq, Eq, Debug)]
+    pub enum Answer {
+        Integer(usize),
+        Printable(Vec<u8>),
+        None,
+    }
+
+    impl From<Option<usize>> for Answer {
+        fn from(o: Option<usize>) -> Self {
+            match o {
+                Some(n) => Self::Integer(n),
+                None => Self::None,
+            }
+        }
+    }
+
+    pub fn run_solutions(day: DayNum) -> Result<BTreeMap<usize, Vec<Answer>>, AOCError> {
         super::solutions::dispatch(day)
     }
 

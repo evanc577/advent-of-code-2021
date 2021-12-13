@@ -22,7 +22,7 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day02 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let final_pos = self
             .input
             .iter()
@@ -35,10 +35,10 @@ impl Day for Day02 {
                 acc
             });
 
-        (final_pos.horizontal * final_pos.depth).try_into().ok()
+        (final_pos.horizontal * final_pos.depth).try_into().ok().into()
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let final_pos = self
             .input
             .iter()
@@ -54,7 +54,7 @@ impl Day for Day02 {
                 acc
             });
 
-        (final_pos.horizontal * final_pos.depth).try_into().ok()
+        (final_pos.horizontal * final_pos.depth).try_into().ok().into()
     }
 }
 
@@ -85,12 +85,12 @@ forward 2";
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(150));
+        assert_eq!(runner.part_1(), Answer::Integer(150));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(900));
+        assert_eq!(runner.part_2(), Answer::Integer(900));
     }
 }

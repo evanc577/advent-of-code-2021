@@ -59,19 +59,19 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day04 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let mut input = self.input.clone();
         for n in input.number_order {
             for board in input.boards.iter_mut() {
                 if board.mark_cell(n) == GameState::Completed {
-                    return Some(board.score());
+                    return Answer::Integer(board.score());
                 }
             }
         }
-        None
+        Answer::None
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let mut input = self.input.clone();
         let mut boards_ref: Vec<_> = input.boards.iter_mut().collect();
         let mut uncomplete_count = boards_ref.len();
@@ -87,11 +87,11 @@ impl Day for Day04 {
                 }
 
                 if uncomplete_count == 0 {
-                    return Some(board.score());
+                    return Answer::Integer(board.score());
                 }
             }
         }
-        None
+        Answer::None
     }
 }
 
@@ -217,12 +217,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(4512));
+        assert_eq!(runner.part_1(), Answer::Integer(4512));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(1924));
+        assert_eq!(runner.part_2(), Answer::Integer(1924));
     }
 }

@@ -15,12 +15,12 @@ pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCE
 }
 
 impl Day for Day06 {
-    fn part_1(&self) -> Option<usize> {
-        Some(simulate(&self.input, 80))
+    fn part_1(&self) -> Answer {
+        Answer::Integer(simulate(&self.input, 80))
     }
 
-    fn part_2(&self) -> Option<usize> {
-        Some(simulate(&self.input, 256))
+    fn part_2(&self) -> Answer {
+        Answer::Integer(simulate(&self.input, 256))
     }
 }
 
@@ -56,12 +56,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(5934));
+        assert_eq!(runner.part_1(), Answer::Integer(5934));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(26984457539));
+        assert_eq!(runner.part_2(), Answer::Integer(26984457539));
     }
 }

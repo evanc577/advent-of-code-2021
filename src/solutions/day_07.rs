@@ -15,14 +15,14 @@ pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCE
 }
 
 impl Day for Day07 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let fuel = calculate(&self.input, abs_diff);
-        Some(fuel)
+        Answer::Integer(fuel)
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let fuel = calculate(&self.input, |a, b| triangular(abs_diff(a, b)));
-        Some(fuel)
+        Answer::Integer(fuel)
     }
 }
 
@@ -56,12 +56,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(37));
+        assert_eq!(runner.part_1(), Answer::Integer(37));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(168));
+        assert_eq!(runner.part_2(), Answer::Integer(168));
     }
 }

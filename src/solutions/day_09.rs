@@ -19,22 +19,22 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day09 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let sum: usize = low_points(&self.input)
             .iter()
             .map(|(i, j)| &self.input[[*i, *j]] + 1)
             .sum();
-        Some(sum)
+        Answer::Integer(sum)
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let mut basins: Vec<_> = low_points(&self.input)
             .iter()
             .map(|point| basin_size(&self.input, *point))
             .collect();
         basins[..].select_nth_unstable_by(3, |a, b| b.cmp(a)); // reverse sort
         let product: usize = basins.iter().take(3).product();
-        Some(product)
+        Answer::Integer(product)
     }
 }
 
@@ -100,12 +100,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(15));
+        assert_eq!(runner.part_1(), Answer::Integer(15));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(1134));
+        assert_eq!(runner.part_2(), Answer::Integer(1134));
     }
 }

@@ -13,8 +13,8 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day01 {
-    fn part_1(&self) -> Option<usize> {
-        Some(
+    fn part_1(&self) -> Answer {
+        Answer::Integer(
             self.input
                 .iter()
                 .tuple_windows::<(_, _)>()
@@ -23,8 +23,8 @@ impl Day for Day01 {
         )
     }
 
-    fn part_2(&self) -> Option<usize> {
-        Some(
+    fn part_2(&self) -> Answer {
+        Answer::Integer(
             self.input
                 .iter()
                 .tuple_windows::<(_, _, _)>()
@@ -59,12 +59,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(7));
+        assert_eq!(runner.part_1(), Answer::Integer(7));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(5));
+        assert_eq!(runner.part_2(), Answer::Integer(5));
     }
 }

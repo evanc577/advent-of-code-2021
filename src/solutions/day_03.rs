@@ -18,7 +18,7 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day03 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let gamma: BinaryNumber = self
             .input
             .axis_iter(Axis(1))
@@ -33,13 +33,13 @@ impl Day for Day03 {
             })
             .collect();
         let epsilon = !gamma.clone();
-        Some(gamma.to_usize() * epsilon.to_usize())
+        Answer::Integer(gamma.to_usize() * epsilon.to_usize())
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let o2 = part_02_helper(self.input.clone(), |zeros, ones| ones >= zeros);
         let co2 = part_02_helper(self.input.clone(), |zeros, ones| zeros > ones);
-        Some(o2.to_usize() * co2.to_usize())
+        Answer::Integer(o2.to_usize() * co2.to_usize())
     }
 }
 
@@ -182,12 +182,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(198));
+        assert_eq!(runner.part_1(), Answer::Integer(198));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(230));
+        assert_eq!(runner.part_2(), Answer::Integer(230));
     }
 }

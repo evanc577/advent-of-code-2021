@@ -31,7 +31,7 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day08 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let count: usize = self
             .input
             .iter()
@@ -42,10 +42,10 @@ impl Day for Day08 {
                     .count()
             })
             .sum();
-        Some(count)
+        Answer::Integer(count)
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         // Sum results of all lines
         let sum: usize = self
             .input
@@ -118,7 +118,7 @@ impl Day for Day08 {
             })
             .sum();
 
-        Some(sum)
+        Answer::Integer(sum)
     }
 }
 
@@ -186,12 +186,12 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(26));
+        assert_eq!(runner.part_1(), Answer::Integer(26));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(61229));
+        assert_eq!(runner.part_2(), Answer::Integer(61229));
     }
 }

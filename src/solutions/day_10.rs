@@ -12,7 +12,7 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day10 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let points: usize = filter_lines(&self.input, LineStatus::Corrupted)
             .iter()
             .filter_map(|c| {
@@ -23,10 +23,10 @@ impl Day for Day10 {
                 }
             })
             .sum();
-        Some(points)
+        Answer::Integer(points)
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let mut scores: Vec<_> = filter_lines(&self.input, LineStatus::Incomplete)
             .iter()
             .filter_map(|c| {
@@ -43,13 +43,13 @@ impl Day for Day10 {
             .collect();
 
         if scores.is_empty() {
-            return None;
+            return Answer::None;
         }
 
         let middle_score_idx = scores.len() / 2;
         scores[..].select_nth_unstable(middle_score_idx);
         let middle_score = scores[middle_score_idx];
-        Some(middle_score)
+        Answer::Integer(middle_score)
     }
 }
 
@@ -210,12 +210,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(26397));
+        assert_eq!(runner.part_1(), Answer::Integer(26397));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(288957));
+        assert_eq!(runner.part_2(), Answer::Integer(288957));
     }
 }

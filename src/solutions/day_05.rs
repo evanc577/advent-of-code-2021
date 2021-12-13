@@ -42,14 +42,14 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
 }
 
 impl Day for Day05 {
-    fn part_1(&self) -> Option<usize> {
+    fn part_1(&self) -> Answer {
         let grid = Grid::with_lines(&self.input, AllowDiagonals::No);
-        Some(grid.overlaps())
+        Answer::Integer(grid.overlaps())
     }
 
-    fn part_2(&self) -> Option<usize> {
+    fn part_2(&self) -> Answer {
         let grid = Grid::with_lines(&self.input, AllowDiagonals::Yes);
-        Some(grid.overlaps())
+        Answer::Integer(grid.overlaps())
     }
 }
 
@@ -166,12 +166,12 @@ mod test {
     #[test]
     fn part_1() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Some(5));
+        assert_eq!(runner.part_1(), Answer::Integer(5));
     }
 
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Some(12));
+        assert_eq!(runner.part_2(), Answer::Integer(12));
     }
 }
