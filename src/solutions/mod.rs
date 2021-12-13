@@ -24,9 +24,12 @@ pub fn dispatch(day: DayNum) -> Result<BTreeMap<usize, Vec<Answer>>, AOCError> {
             ret.insert(d, run(get_runner(d, i)?)?);
         }
         DayNum::All => {
-            for d in 1..=11 {
+            for d in 1..=25 {
                 let input_path = format!("input/day_{:02}.txt", d);
-                ret.insert(d, run(get_runner(d, input_path)?)?);
+                match get_runner(d, input_path) {
+                    Ok(r) => ret.insert(d, run(r)?),
+                    Err(_) => continue,
+                };
             }
         }
     }

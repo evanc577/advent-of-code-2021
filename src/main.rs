@@ -1,4 +1,4 @@
-use std::ffi::{OsString, OsStr};
+use std::ffi::{OsStr, OsString};
 use std::process::exit;
 
 use aoc2021::prelude::*;
@@ -16,16 +16,14 @@ fn run() -> Result<(), AOCError> {
         .version(env!("CARGO_PKG_VERSION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .about(env!("CARGO_PKG_DESCRIPTION"))
-        .arg(
-            Arg::with_name("day")
-                .help("Advent of code day")
-                .index(1),
-        )
+        .arg(Arg::with_name("day").help("Advent of code day").index(1))
         .arg(Arg::with_name("input").help("Input file to use").index(2))
         .get_matches();
 
     let day = {
-        let day_str = matches.value_of_os("day").unwrap_or_else(|| OsStr::new("all"));
+        let day_str = matches
+            .value_of_os("day")
+            .unwrap_or_else(|| OsStr::new("all"));
         if day_str == "all" {
             DayNum::All
         } else {
@@ -47,7 +45,10 @@ fn run() -> Result<(), AOCError> {
             let solution_text = match part_solution {
                 Answer::Integer(x) => x.to_string(),
                 Answer::None => "No solution".into(),
-                Answer::Printable(x) => String::from_utf8_lossy(x).into(),
+                Answer::Printable(x) => match String::from_utf8(x.to_vec()) {
+                    Ok(s) => "\n".to_owned() + &s,
+                    Err(_) => "Invalid UTF8".into(),
+                },
             };
 
             println!("Day {:2} Part {}: {}", day, part + 1, solution_text);
