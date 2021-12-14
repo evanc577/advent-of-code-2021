@@ -27,15 +27,15 @@ pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCE
 
 impl Day for Day14 {
     fn part_1(&self) -> Answer {
-        Answer::Integer(simulate(&self.template, &self.insertion_rules, 10))
+        simulate(&self.template, &self.insertion_rules, 10).into()
     }
 
     fn part_2(&self) -> Answer {
-        Answer::Integer(simulate(&self.template, &self.insertion_rules, 40))
+        simulate(&self.template, &self.insertion_rules, 40).into()
     }
 }
 
-fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) -> usize {
+fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) -> Option<usize> {
     // Character pair counts
     let mut pairs = HashMap::new();
     for (&a, &b) in template.iter().tuple_windows::<(_, _)>() {
@@ -68,10 +68,10 @@ fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) 
         pairs = next_pairs;
     }
 
-    if let MinMaxResult::MinMax(min, max) = counts.values().minmax() {
-        max - min
-    } else {
-        0
+    match counts.values().minmax() {
+        MinMaxResult::MinMax(min, max) => Some(max - min),
+        MinMaxResult::OneElement(_) => Some(0),
+        MinMaxResult::NoElements => None,
     }
 }
 
