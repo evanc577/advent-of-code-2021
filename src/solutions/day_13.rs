@@ -32,15 +32,12 @@ impl Day for Day13 {
     }
 
     fn part_2(&self) -> Answer {
-        let paper = self
-            .folds
+        self.folds
             .iter()
             .fold(Paper::from_dots(&self.dots[..]), |acc, fold| {
                 do_fold(&acc, fold)
-            });
-        let mut buf = Vec::new();
-        let _ = write!(buf, "{}", paper);
-        Answer::Printable(buf)
+            })
+            .into()
     }
 }
 
@@ -99,15 +96,15 @@ impl fmt::Display for Paper {
             for x in x_min..=x_max {
                 match &self.get(&Dot { x, y }) {
                     Some(_) => {
-                        let _ = write!(f, "#");
+                        write!(f, "#")?;
                     }
                     None => {
-                        let _ = write!(f, ".");
+                        write!(f, ".")?;
                     }
                 }
             }
             if y != y_max {
-                let _ = writeln!(f);
+                writeln!(f)?;
             }
         }
         write!(f, "")
@@ -125,6 +122,16 @@ impl Deref for Paper {
 impl DerefMut for Paper {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
+    }
+}
+
+impl From<Paper> for Answer {
+    fn from(p: Paper) -> Self {
+        let mut buf = Vec::new();
+        match write!(buf, "{}", p) {
+            Ok(_) => Answer::Printable(buf),
+            Err(e) => Answer::Error(format!("{}", e)),
+        }
     }
 }
 

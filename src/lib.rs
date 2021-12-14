@@ -59,6 +59,7 @@ pub mod prelude {
         Integer(usize),
         Printable(Vec<u8>),
         None,
+        Error(String),
     }
 
     impl From<Option<usize>> for Answer {

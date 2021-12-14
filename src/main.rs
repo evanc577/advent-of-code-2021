@@ -49,6 +49,7 @@ fn run() -> Result<(), AOCError> {
                     Ok(s) => "\n".to_owned() + &s,
                     Err(_) => "Invalid UTF8".into(),
                 },
+                Answer::Error(s) => format!("Error: {}", s),
             };
 
             println!("Day {:2} Part {}: {}", day, part + 1, solution_text);
