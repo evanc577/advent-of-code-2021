@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 
-use itertools::Itertools;
+use itertools::{Itertools, MinMaxResult};
 
 use crate::prelude::*;
 
@@ -31,64 +31,52 @@ impl Day for Day14 {
     }
 
     fn part_2(&self) -> Answer {
-        // Answer::Integer(simulate(&self.template, &self.insertion_rules, 40))
-        Answer::None
+        Answer::Integer(simulate(&self.template, &self.insertion_rules, 40))
     }
 }
 
 fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) -> usize {
-    let mut polymer = template.clone();
-    for _ in 0..steps {
-        let inserted: HashMap<_, _> = polymer
-            .iter()
-            .tuple_windows::<(_, _)>()
-            .enumerate()
-            .filter_map(|(i, (&a, &b))| insertion_rules.get(&(a, b)).map(|insert| (i, insert)))
-            .collect();
+    // Character pair counts
+    let mut pairs = HashMap::new();
+    for (&a, &b) in template.iter().tuple_windows::<(_, _)>() {
+        *pairs.entry((a, b)).or_insert(0) += 1;
+    }
 
-        let mut next_polymer = Polymer::new();
-        for (i, &element) in polymer.iter().enumerate() {
-            next_polymer.push(element);
-            if let Some(&&insert) = inserted.get(&i) {
-                next_polymer.push(insert);
+    // Individual character counts
+    let mut counts = HashMap::new();
+    for c in template.iter() {
+        *counts.entry(c).or_insert(0) += 1;
+    }
+
+    for _ in 0..steps {
+        let mut next_pairs = pairs.clone();
+
+        // Iterate over all pairs
+        for (pair, &count) in pairs.iter() {
+            // Check insertion rules
+            if let Some(c) = insertion_rules.get(pair) {
+                // Remove current pair
+                *next_pairs.entry(*pair).or_insert(0) -= count;
+                // Add new pairs
+                *next_pairs.entry((pair.0, *c)).or_insert(0) += count;
+                *next_pairs.entry((*c, pair.1)).or_insert(0) += count;
+                // Increment individual character counts
+                *counts.entry(c).or_insert(0) += count;
             }
         }
 
-        polymer = next_polymer;
+        pairs = next_pairs;
     }
 
-    polymer.score()
+    if let MinMaxResult::MinMax(min, max) = counts.values().minmax() {
+        max - min
+    } else {
+        0
+    }
 }
 
 #[derive(Debug)]
 struct Polymer(Vec<char>);
-
-impl Polymer {
-    fn new() -> Self {
-        Self(Vec::new())
-    }
-
-    fn score(&self) -> usize {
-        let mut map = HashMap::new();
-        for c in self.iter() {
-            *map.entry(c).or_insert(0) += 1;
-        }
-
-        let max = if let Some((_, n)) = map.iter().max_by(|(_, a), (_, b)| a.cmp(b)) {
-            n
-        } else {
-            return 0;
-        };
-
-        let min = if let Some((_, n)) = map.iter().min_by(|(_, a), (_, b)| a.cmp(b)) {
-            n
-        } else {
-            return 0;
-        };
-
-        max - min
-    }
-}
 
 impl Clone for Polymer {
     fn clone(&self) -> Self {
@@ -198,6 +186,6 @@ CN -> C";
     #[test]
     fn part_2() {
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_2(), Answer::None);
+        assert_eq!(runner.part_2(), Answer::Integer(2188189693529));
     }
 }
