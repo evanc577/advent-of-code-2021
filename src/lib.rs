@@ -57,6 +57,7 @@ pub mod prelude {
 
     impl Error for AOCError {}
 
+    #[derive(Debug)]
     pub enum Answer {
         Integer(usize),
         Printable(Vec<u8>),
