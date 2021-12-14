@@ -86,7 +86,7 @@ impl Paper {
 }
 
 impl fmt::Display for Paper {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let x_min = self.iter().map(|d| d.x).min().unwrap_or(0);
         let x_max = self.iter().map(|d| d.x).max().unwrap_or(0);
         let y_min = self.iter().map(|d| d.y).min().unwrap_or(0);
