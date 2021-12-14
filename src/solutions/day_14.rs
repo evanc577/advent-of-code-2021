@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::str::FromStr;
 
 use itertools::{Itertools, MinMaxResult};
@@ -100,13 +100,6 @@ impl Deref for Polymer {
     }
 }
 
-impl DerefMut for Polymer {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-
-#[derive(Clone, PartialEq, Eq, Hash)]
 struct InsertionRule {
     pair: (char, char),
     insertion: char,
