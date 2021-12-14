@@ -10,6 +10,26 @@ pub mod prelude {
     use std::num::ParseIntError;
     use std::path::Path;
 
+    // Functions
+
+    pub fn read_input_lines(
+        path: impl AsRef<Path>,
+    ) -> Result<impl Iterator<Item = String>, AOCError> {
+        let file = File::open(path).map_err(AOCError::BadInputFile)?;
+        let lines = io::BufReader::new(file)
+            .lines()
+            .map(|l| l.map_err(AOCError::BadInputFile))
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter();
+        Ok(lines)
+    }
+
+    pub fn run_solutions(day: DayNum) -> Result<BTreeMap<usize, Vec<Answer>>, AOCError> {
+        super::solutions::dispatch(day)
+    }
+
+    // Enums
+
     #[derive(Debug)]
     pub enum AOCError {
         BadDay(OsString),
@@ -37,29 +57,22 @@ pub mod prelude {
 
     impl Error for AOCError {}
 
-    pub fn read_input_lines(
-        path: impl AsRef<Path>,
-    ) -> Result<impl Iterator<Item = String>, AOCError> {
-        let file = File::open(path).map_err(AOCError::BadInputFile)?;
-        let lines = io::BufReader::new(file)
-            .lines()
-            .map(|l| l.map_err(AOCError::BadInputFile))
-            .collect::<Result<Vec<_>, _>>()?
-            .into_iter();
-        Ok(lines)
-    }
-
-    pub trait Day {
-        fn part_1(&self) -> Answer;
-        fn part_2(&self) -> Answer;
-    }
-
-    #[derive(Clone, PartialEq, Eq, Debug)]
     pub enum Answer {
         Integer(usize),
         Printable(Vec<u8>),
         None,
-        Error(String),
+        Error(Box<dyn Error>),
+    }
+
+    impl PartialEq for Answer {
+        fn eq(&self, other: &Self) -> bool {
+            match self {
+                Self::Integer(a) => matches!(other, Self::Integer(b) if *a == *b),
+                Self::Printable(a) => matches!(other, Self::Printable(b) if *a == *b),
+                Self::None => matches!(other, Self::None),
+                Self::Error(_) => false,
+            }
+        }
     }
 
     impl From<Option<usize>> for Answer {
@@ -71,12 +84,15 @@ pub mod prelude {
         }
     }
 
-    pub fn run_solutions(day: DayNum) -> Result<BTreeMap<usize, Vec<Answer>>, AOCError> {
-        super::solutions::dispatch(day)
-    }
-
     pub enum DayNum {
         One(usize, OsString),
         All,
+    }
+
+    // Traits
+
+    pub trait Day {
+        fn part_1(&self) -> Answer;
+        fn part_2(&self) -> Answer;
     }
 }

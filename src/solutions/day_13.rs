@@ -130,7 +130,7 @@ impl From<Paper> for Answer {
         let mut buf = Vec::new();
         match write!(buf, "{}", p) {
             Ok(_) => Answer::Printable(buf),
-            Err(e) => Answer::Error(format!("{}", e)),
+            Err(e) => Answer::Error(Box::new(e)),
         }
     }
 }
