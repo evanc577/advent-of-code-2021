@@ -96,10 +96,10 @@ impl fmt::Display for Paper {
             for x in x_min..=x_max {
                 match &self.get(&Dot { x, y }) {
                     Some(_) => {
-                        write!(f, "#")?;
+                        write!(f, "⬜")?;
                     }
                     None => {
-                        write!(f, ".")?;
+                        write!(f, "⬛")?;
                     }
                 }
             }
@@ -228,11 +228,11 @@ fold along x=5";
 
     #[test]
     fn part_2() {
-        let expected: Vec<u8> = "#####
-#...#
-#...#
-#...#
-#####"
+        let expected: Vec<u8> = "⬜⬜⬜⬜⬜
+⬜⬛⬛⬛⬜
+⬜⬛⬛⬛⬜
+⬜⬛⬛⬛⬜
+⬜⬜⬜⬜⬜"
             .into();
         let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Printable(expected));
