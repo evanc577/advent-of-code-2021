@@ -107,7 +107,7 @@ impl fmt::Display for Paper {
                 writeln!(f)?;
             }
         }
-        write!(f, "")
+        Ok(())
     }
 }
 
