@@ -75,14 +75,8 @@ fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) 
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Polymer(Vec<char>);
-
-impl Clone for Polymer {
-    fn clone(&self) -> Self {
-        Self(self.0.clone())
-    }
-}
 
 impl FromStr for Polymer {
     type Err = AOCError;
