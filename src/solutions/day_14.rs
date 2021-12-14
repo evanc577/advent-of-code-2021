@@ -43,9 +43,9 @@ fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) 
     }
 
     // Individual character counts
-    let mut counts = HashMap::new();
+    let mut char_counts = HashMap::new();
     for c in template.iter() {
-        *counts.entry(c).or_insert(0) += 1;
+        *char_counts.entry(c).or_insert(0) += 1;
     }
 
     for _ in 0..steps {
@@ -61,14 +61,14 @@ fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) 
                 *next_pairs.entry((pair.0, *c)).or_insert(0) += count;
                 *next_pairs.entry((*c, pair.1)).or_insert(0) += count;
                 // Increment individual character counts
-                *counts.entry(c).or_insert(0) += count;
+                *char_counts.entry(c).or_insert(0) += count;
             }
         }
 
         pairs = next_pairs;
     }
 
-    match counts.values().minmax() {
+    match char_counts.values().minmax() {
         MinMaxResult::MinMax(min, max) => Some(max - min),
         MinMaxResult::OneElement(_) => Some(0),
         MinMaxResult::NoElements => None,
