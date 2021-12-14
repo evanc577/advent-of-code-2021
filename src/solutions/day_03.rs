@@ -166,7 +166,7 @@ impl std::ops::Not for Bit {
 mod test {
     use super::*;
 
-    const INPUT: &str = "00100
+    static INPUT: &str = "00100
 11110
 10110
 10111

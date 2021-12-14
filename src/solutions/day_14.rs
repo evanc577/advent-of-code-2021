@@ -151,7 +151,7 @@ impl Deref for InsertionRules {
 mod test {
     use super::*;
 
-    const INPUT: &str = "NNCB
+    static INPUT: &str = "NNCB
 
 CH -> B
 HH -> N

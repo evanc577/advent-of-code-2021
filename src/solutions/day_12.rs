@@ -143,7 +143,7 @@ fn generate_adjacency(paths: &[Path]) -> HashMap<&Cave, Vec<&Cave>> {
 mod test {
     use super::*;
 
-    const INPUT: &str = "start-A
+    static INPUT: &str = "start-A
 start-b
 A-c
 A-b

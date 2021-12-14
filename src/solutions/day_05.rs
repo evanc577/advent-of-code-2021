@@ -152,7 +152,7 @@ fn sign(n: isize) -> isize {
 mod test {
     use super::*;
 
-    const INPUT: &str = "0,9 -> 5,9
+    static INPUT: &str = "0,9 -> 5,9
 8,0 -> 0,8
 9,4 -> 3,4
 2,2 -> 2,1

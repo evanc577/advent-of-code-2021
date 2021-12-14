@@ -91,7 +91,7 @@ fn basin_size(input: &Array2<usize>, point: (usize, usize)) -> usize {
 mod test {
     use super::*;
 
-    const INPUT: &str = "2199943210
+    static INPUT: &str = "2199943210
 3987894921
 9856789892
 8767896789

@@ -51,7 +51,7 @@ fn simulate(input: &[usize], num_days: usize) -> usize {
 mod test {
     use super::*;
 
-    const INPUT: &str = "3,4,3,1,2";
+    static INPUT: &str = "3,4,3,1,2";
 
     #[test]
     fn part_1() {

@@ -198,7 +198,7 @@ impl FromStr for Fold {
 mod test {
     use super::*;
 
-    const INPUT: &str = "6,10
+    static INPUT: &str = "6,10
 0,14
 9,10
 0,3

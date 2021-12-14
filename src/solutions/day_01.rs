@@ -45,7 +45,7 @@ impl Day for Day01 {
 mod test {
     use super::*;
 
-    const INPUT: &str = "199
+    static INPUT: &str = "199
 200
 208
 210

@@ -75,7 +75,7 @@ enum Movement {
 mod test {
     use super::*;
 
-    const INPUT: &str = "forward 5
+    static INPUT: &str = "forward 5
 down 5
 forward 8
 up 3

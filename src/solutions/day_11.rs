@@ -131,7 +131,7 @@ enum EndCondition {
 mod test {
     use super::*;
 
-    const INPUT: &str = "5483143223
+    static INPUT: &str = "5483143223
 2745854711
 5264556173
 6141336146

@@ -51,7 +51,7 @@ fn triangular(n: usize) -> usize {
 mod test {
     use super::*;
 
-    const INPUT: &str = "16,1,2,0,4,2,7,1,2,14";
+    static INPUT: &str = "16,1,2,0,4,2,7,1,2,14";
 
     #[test]
     fn part_1() {
