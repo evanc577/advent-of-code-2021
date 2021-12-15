@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet as HashSet;
 use std::fmt;
 use std::io::Write;
 use std::ops::{Deref, DerefMut};
@@ -73,7 +73,7 @@ struct Paper(HashSet<Dot>);
 
 impl Paper {
     fn new() -> Self {
-        Self(HashSet::new())
+        Self(HashSet::default())
     }
 
     fn from_dots(dots: &[Dot]) -> Self {

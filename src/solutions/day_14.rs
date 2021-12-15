@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap as HashMap;
 use std::ops::Deref;
 use std::str::FromStr;
 
@@ -37,13 +37,13 @@ impl Day for Day14 {
 
 fn simulate(template: &Polymer, insertion_rules: &InsertionRules, steps: usize) -> Option<usize> {
     // Character pair counts
-    let mut pairs = HashMap::new();
+    let mut pairs = HashMap::default();
     for (&a, &b) in template.iter().tuple_windows::<(_, _)>() {
         *pairs.entry((a, b)).or_insert(0) += 1;
     }
 
     // Individual character counts
-    let mut char_counts = HashMap::new();
+    let mut char_counts = HashMap::default();
     for c in template.iter() {
         *char_counts.entry(c).or_insert(0) += 1;
     }
@@ -125,7 +125,7 @@ struct InsertionRules(HashMap<(char, char), char>);
 
 impl FromIterator<InsertionRule> for InsertionRules {
     fn from_iter<T: IntoIterator<Item = InsertionRule>>(iter: T) -> Self {
-        let mut map = HashMap::new();
+        let mut map = HashMap::default();
         for x in iter {
             map.insert(x.pair, x.insertion);
         }

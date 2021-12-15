@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap as HashMap;
 
 use crate::prelude::*;
 
@@ -57,7 +57,7 @@ struct Grid(HashMap<Point, usize>);
 
 impl Grid {
     fn with_lines(lines: &[Line], diagonals: AllowDiagonals) -> Self {
-        let mut grid = Self(HashMap::new());
+        let mut grid = Self(HashMap::default());
         for line in lines {
             grid.add_line(line, diagonals);
         }

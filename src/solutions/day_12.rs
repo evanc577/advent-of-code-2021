@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use rustc_hash::FxHashMap as HashMap;
 use std::str::FromStr;
 
 use crate::prelude::*;
@@ -114,7 +114,7 @@ struct Stack<'a>(Vec<StackValue<'a>>);
 
 impl<'a> Stack<'a> {
     fn new(cave: &'a Cave) -> Self {
-        Self(vec![(cave, HashMap::new())])
+        Self(vec![(cave, HashMap::default())])
     }
 
     fn push(&mut self, value: StackValue<'a>) {
@@ -127,7 +127,7 @@ impl<'a> Stack<'a> {
 }
 
 fn generate_adjacency(paths: &[Path]) -> HashMap<&Cave, Vec<&Cave>> {
-    let mut map = HashMap::new();
+    let mut map = HashMap::default();
     for path in paths {
         if path.1 != Cave::Start {
             map.entry(&path.0).or_insert_with(Vec::new).push(&path.1);

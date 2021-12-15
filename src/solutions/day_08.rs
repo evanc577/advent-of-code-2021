@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use rustc_hash::FxHashSet as HashSet;
 
 use crate::prelude::*;
 
@@ -133,7 +133,7 @@ struct Pattern(HashSet<WireSegment>);
 
 impl FromIterator<WireSegment> for Pattern {
     fn from_iter<T: IntoIterator<Item = WireSegment>>(iter: T) -> Self {
-        let mut c = Self(HashSet::new());
+        let mut c = Self(HashSet::default());
         for i in iter {
             c.0.insert(i);
         }
