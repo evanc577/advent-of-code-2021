@@ -8,24 +8,24 @@ pub struct Day15 {
     grid: Array2<usize>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let input: Vec<_> = input.collect();
-    let rows = input.len();
-    let cols = input.get(0).map(|line| line.len()).unwrap_or(0);
-    let mut grid = Array2::from_elem((rows, cols), usize::MAX);
-    for (i, line) in input.iter().enumerate() {
-        for (j, c) in line.chars().take(cols).enumerate() {
-            grid[[i, j]] = c
-                .to_digit(10)
-                .map(|d| d.try_into().ok())
-                .flatten()
-                .unwrap_or(usize::MAX);
-        }
-    }
-    Ok(Box::new(Day15 { grid }))
-}
-
 impl Day for Day15 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let input: Vec<_> = input.collect();
+        let rows = input.len();
+        let cols = input.get(0).map(|line| line.len()).unwrap_or(0);
+        let mut grid = Array2::from_elem((rows, cols), usize::MAX);
+        for (i, line) in input.iter().enumerate() {
+            for (j, c) in line.chars().take(cols).enumerate() {
+                grid[[i, j]] = c
+                    .to_digit(10)
+                    .map(|d| d.try_into().ok())
+                    .flatten()
+                    .unwrap_or(usize::MAX);
+            }
+        }
+        Ok(Day15 { grid })
+    }
+
     fn part_1(&self) -> Answer {
         shortest_path(
             &self.grid,
@@ -159,13 +159,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day15::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(40));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day15::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(315));
     }
 }

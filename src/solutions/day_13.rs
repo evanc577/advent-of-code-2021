@@ -13,16 +13,16 @@ pub struct Day13 {
     folds: Vec<Fold>,
 }
 
-pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let dots: Vec<Dot> = input.by_ref().map_while(|line| line.parse().ok()).collect();
-    let folds: Vec<Fold> = input.by_ref().map_while(|line| line.parse().ok()).collect();
-    if input.any(|line| !line.is_empty()) {
-        return Err(AOCError::ParseError);
-    }
-    Ok(Box::new(Day13 { dots, folds }))
-}
-
 impl Day for Day13 {
+    fn new(mut input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let dots: Vec<Dot> = input.by_ref().map_while(|line| line.parse().ok()).collect();
+        let folds: Vec<Fold> = input.by_ref().map_while(|line| line.parse().ok()).collect();
+        if input.any(|line| !line.is_empty()) {
+            return Err(AOCError::ParseError);
+        }
+        Ok(Day13 { dots, folds })
+    }
+
     fn part_1(&self) -> Answer {
         self.folds
             .get(0)
@@ -222,7 +222,7 @@ fold along x=5";
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day13::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(17));
     }
 
@@ -234,7 +234,7 @@ fold along x=5";
 ⬜⬛⬛⬛⬜
 ⬜⬜⬜⬜⬜"
             .into();
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day13::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Printable(expected));
     }
 }

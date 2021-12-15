@@ -6,11 +6,13 @@ pub struct Day08 {
     input: Vec<Entry>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let parsed: Vec<_> = input
-        .map(|s| {
-            let (signals, outputs) =
-                if let [signals_str, outputs_str] = *s.split(" | ").take(2).collect::<Vec<_>>() {
+impl Day for Day08 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let parsed: Vec<_> = input
+            .map(|s| {
+                let (signals, outputs) = if let [signals_str, outputs_str] =
+                    *s.split(" | ").take(2).collect::<Vec<_>>()
+                {
                     // Parse signals
                     let signals = signals_str
                         .split(' ')
@@ -24,13 +26,12 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
                 } else {
                     (vec![], vec![])
                 };
-            Entry { signals, outputs }
-        })
-        .collect();
-    Ok(Box::new(Day08 { input: parsed }))
-}
+                Entry { signals, outputs }
+            })
+            .collect();
+        Ok(Day08 { input: parsed })
+    }
 
-impl Day for Day08 {
     fn part_1(&self) -> Answer {
         let count: usize = self
             .input
@@ -185,13 +186,13 @@ gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day08::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(26));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day08::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(61229));
     }
 }

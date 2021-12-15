@@ -5,14 +5,14 @@ pub struct Day01 {
     input: Vec<usize>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let parsed = input
-        .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s)))
-        .collect::<Result<_, _>>()?;
-    Ok(Box::new(Day01 { input: parsed }))
-}
-
 impl Day for Day01 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let parsed = input
+            .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s)))
+            .collect::<Result<_, _>>()?;
+        Ok(Day01 { input: parsed })
+    }
+
     fn part_1(&self) -> Answer {
         Answer::Integer(
             self.input
@@ -58,13 +58,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day01::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(7));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day01::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(5));
     }
 }

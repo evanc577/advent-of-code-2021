@@ -93,6 +93,7 @@ pub mod prelude {
     // Traits
 
     pub trait Day {
+        fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> where Self: Sized;
         fn part_1(&self) -> Answer;
         fn part_2(&self) -> Answer;
     }

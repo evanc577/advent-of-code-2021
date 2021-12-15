@@ -5,19 +5,19 @@ pub struct Day03 {
     input: Array2<Bit>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let input_lines: Vec<_> = input.collect();
-    let num_bits = input_lines[0].len();
-    let mut arr = Array2::default((input_lines.len(), num_bits));
-    for (i, n) in input_lines.iter().enumerate() {
-        for (j, c) in n.chars().enumerate() {
-            arr[[i, j]] = c.into();
-        }
-    }
-    Ok(Box::new(Day03 { input: arr }))
-}
-
 impl Day for Day03 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let input_lines: Vec<_> = input.collect();
+        let num_bits = input_lines[0].len();
+        let mut arr = Array2::default((input_lines.len(), num_bits));
+        for (i, n) in input_lines.iter().enumerate() {
+            for (j, c) in n.chars().enumerate() {
+                arr[[i, j]] = c.into();
+            }
+        }
+        Ok(Day03 { input: arr })
+    }
+
     fn part_1(&self) -> Answer {
         let gamma: BinaryNumber = self
             .input
@@ -181,13 +181,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day03::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(198));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day03::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(230));
     }
 }

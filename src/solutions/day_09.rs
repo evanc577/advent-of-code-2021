@@ -5,20 +5,20 @@ pub struct Day09 {
     input: Array2<usize>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let input: Vec<_> = input.collect();
-    let line_len = input.get(0).ok_or(AOCError::ParseError)?.len();
-    let mut arr = Array2::<usize>::from_elem((input.len() + 2, line_len + 2), usize::MAX);
-    for i in 0..input.len() {
-        for j in 0..line_len {
-            let chars: Vec<_> = input[i].chars().map(|c| c.to_string()).collect();
-            arr[[i + 1, j + 1]] = chars[j].parse().unwrap_or(0);
-        }
-    }
-    Ok(Box::new(Day09 { input: arr }))
-}
-
 impl Day for Day09 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let input: Vec<_> = input.collect();
+        let line_len = input.get(0).ok_or(AOCError::ParseError)?.len();
+        let mut arr = Array2::<usize>::from_elem((input.len() + 2, line_len + 2), usize::MAX);
+        for i in 0..input.len() {
+            for j in 0..line_len {
+                let chars: Vec<_> = input[i].chars().map(|c| c.to_string()).collect();
+                arr[[i + 1, j + 1]] = chars[j].parse().unwrap_or(0);
+            }
+        }
+        Ok(Day09 { input: arr })
+    }
+
     fn part_1(&self) -> Answer {
         let sum: usize = low_points(&self.input)
             .iter()
@@ -99,13 +99,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day09::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(15));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day09::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(1134));
     }
 }

@@ -11,21 +11,21 @@ pub struct Day14 {
     insertion_rules: InsertionRules,
 }
 
-pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let template = input.by_ref().next().ok_or(AOCError::ParseError)?.parse()?;
-    input.next();
-    let insertion_rules = input
-        .map(InsertionRule::try_from)
-        .collect::<Result<Vec<_>, _>>()?
-        .into_iter()
-        .collect();
-    Ok(Box::new(Day14 {
-        template,
-        insertion_rules,
-    }))
-}
-
 impl Day for Day14 {
+    fn new(mut input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let template = input.by_ref().next().ok_or(AOCError::ParseError)?.parse()?;
+        input.next();
+        let insertion_rules = input
+            .map(InsertionRule::try_from)
+            .collect::<Result<Vec<_>, _>>()?
+            .into_iter()
+            .collect();
+        Ok(Day14 {
+            template,
+            insertion_rules,
+        })
+    }
+
     fn part_1(&self) -> Answer {
         simulate(&self.template, &self.insertion_rules, 10).into()
     }
@@ -166,13 +166,13 @@ CN -> C";
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day14::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(1588));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day14::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(2188189693529));
     }
 }

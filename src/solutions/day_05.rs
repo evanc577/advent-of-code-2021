@@ -6,42 +6,44 @@ pub struct Day05 {
     input: Vec<Line>,
 }
 
-#[allow(clippy::match_ref_pats)]
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let parsed: Vec<_> = input
-        .filter_map(|line_str| {
-            // Parse line in form "a,b -> x,y"
-            if let points_str @ &[_, _] = line_str.split(" -> ").collect::<Vec<_>>().as_slice() {
-                // Parse point in form "a,b"
-                let points = points_str
-                    .iter()
-                    .filter_map(|point_str| {
-                        if let &[x_str, y_str] = point_str.split(',').collect::<Vec<_>>().as_slice()
-                        {
-                            // Parse x/y coordinate
-                            let x = x_str.parse().ok()?;
-                            let y = y_str.parse().ok()?;
-
-                            return Some(Point { x, y });
-                        }
-
-                        None
-                    })
-                    .collect::<Vec<_>>();
-
-                if let &[p1, p2] = points.as_slice() {
-                    return Some(Line { p1, p2 });
-                }
-            }
-
-            None
-        })
-        .collect();
-
-    Ok(Box::new(Day05 { input: parsed }))
-}
-
 impl Day for Day05 {
+    #[allow(clippy::match_ref_pats)]
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let parsed: Vec<_> = input
+            .filter_map(|line_str| {
+                // Parse line in form "a,b -> x,y"
+                if let points_str @ &[_, _] = line_str.split(" -> ").collect::<Vec<_>>().as_slice()
+                {
+                    // Parse point in form "a,b"
+                    let points = points_str
+                        .iter()
+                        .filter_map(|point_str| {
+                            if let &[x_str, y_str] =
+                                point_str.split(',').collect::<Vec<_>>().as_slice()
+                            {
+                                // Parse x/y coordinate
+                                let x = x_str.parse().ok()?;
+                                let y = y_str.parse().ok()?;
+
+                                return Some(Point { x, y });
+                            }
+
+                            None
+                        })
+                        .collect::<Vec<_>>();
+
+                    if let &[p1, p2] = points.as_slice() {
+                        return Some(Line { p1, p2 });
+                    }
+                }
+
+                None
+            })
+            .collect();
+
+        Ok(Day05 { input: parsed })
+    }
+
     fn part_1(&self) -> Answer {
         let grid = Grid::with_lines(&self.input, AllowDiagonals::No);
         Answer::Integer(grid.overlaps())
@@ -165,13 +167,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day05::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(5));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day05::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(12));
     }
 }

@@ -5,23 +5,23 @@ pub struct Day02 {
     input: Vec<Movement>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let parsed = input
-        .map(|s| {
-            let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::ParseError)?;
-            match (split.0.to_lowercase().as_str(), split.1.parse()) {
-                ("forward", Ok(n)) => Ok(Movement::Forward(n)),
-                ("down", Ok(n)) => Ok(Movement::Down(n)),
-                ("up", Ok(n)) => Ok(Movement::Up(n)),
-                (s, Err(e)) => Err(AOCError::ParseIntError(e, s.into())),
-                _ => Err(AOCError::ParseError),
-            }
-        })
-        .collect::<Result<_, _>>()?;
-    Ok(Box::new(Day02 { input: parsed }))
-}
-
 impl Day for Day02 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let parsed = input
+            .map(|s| {
+                let split: (_, _) = s.split(' ').next_tuple().ok_or(AOCError::ParseError)?;
+                match (split.0.to_lowercase().as_str(), split.1.parse()) {
+                    ("forward", Ok(n)) => Ok(Movement::Forward(n)),
+                    ("down", Ok(n)) => Ok(Movement::Down(n)),
+                    ("up", Ok(n)) => Ok(Movement::Up(n)),
+                    (s, Err(e)) => Err(AOCError::ParseIntError(e, s.into())),
+                    _ => Err(AOCError::ParseError),
+                }
+            })
+            .collect::<Result<_, _>>()?;
+        Ok(Day02 { input: parsed })
+    }
+
     fn part_1(&self) -> Answer {
         let final_pos = self
             .input
@@ -35,7 +35,10 @@ impl Day for Day02 {
                 acc
             });
 
-        (final_pos.horizontal * final_pos.depth).try_into().ok().into()
+        (final_pos.horizontal * final_pos.depth)
+            .try_into()
+            .ok()
+            .into()
     }
 
     fn part_2(&self) -> Answer {
@@ -54,7 +57,10 @@ impl Day for Day02 {
                 acc
             });
 
-        (final_pos.horizontal * final_pos.depth).try_into().ok().into()
+        (final_pos.horizontal * final_pos.depth)
+            .try_into()
+            .ok()
+            .into()
     }
 }
 
@@ -84,13 +90,13 @@ forward 2";
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day02::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(150));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day02::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(900));
     }
 }

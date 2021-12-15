@@ -8,57 +8,57 @@ pub struct Day04 {
     input: BingoInput,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let mut input_iter = input;
+impl Day for Day04 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let mut input_iter = input;
 
-    // Parse number order
-    let number_order = input_iter
-        .next()
-        .ok_or(AOCError::ParseError)?
-        .split(',')
-        .map(|c| {
-            c.parse::<usize>()
-                .map_err(|e| AOCError::ParseIntError(e, c.into()))
-        })
-        .collect::<Result<_, _>>()?;
+        // Parse number order
+        let number_order = input_iter
+            .next()
+            .ok_or(AOCError::ParseError)?
+            .split(',')
+            .map(|c| {
+                c.parse::<usize>()
+                    .map_err(|e| AOCError::ParseIntError(e, c.into()))
+            })
+            .collect::<Result<_, _>>()?;
 
-    // Parse boards
-    let boards = input_iter
-        .chunks(6)
-        .into_iter()
-        .map(|chunk| {
-            let mut board: Array2<BingoCell> = Array2::default((5, 5));
-            // Parse one board
-            for (i, line) in chunk.skip(1).take(5).enumerate() {
-                // Parse one line
-                for (j, value_str) in line
-                    .split(' ')
-                    .filter(|s| !s.is_empty())
-                    .take(5)
-                    .enumerate()
-                {
-                    board[[i, j]] = BingoCell {
-                        value: value_str
-                            .parse()
-                            .map_err(|e| AOCError::ParseIntError(e, value_str.into()))?,
-                        marked: false,
+        // Parse boards
+        let boards = input_iter
+            .chunks(6)
+            .into_iter()
+            .map(|chunk| {
+                let mut board: Array2<BingoCell> = Array2::default((5, 5));
+                // Parse one board
+                for (i, line) in chunk.skip(1).take(5).enumerate() {
+                    // Parse one line
+                    for (j, value_str) in line
+                        .split(' ')
+                        .filter(|s| !s.is_empty())
+                        .take(5)
+                        .enumerate()
+                    {
+                        board[[i, j]] = BingoCell {
+                            value: value_str
+                                .parse()
+                                .map_err(|e| AOCError::ParseIntError(e, value_str.into()))?,
+                            marked: false,
+                        }
                     }
                 }
-            }
 
-            Ok(BingoBoard::new(board))
+                Ok(BingoBoard::new(board))
+            })
+            .collect::<Result<_, _>>()?;
+
+        Ok(Day04 {
+            input: BingoInput {
+                boards,
+                number_order,
+            },
         })
-        .collect::<Result<_, _>>()?;
+    }
 
-    Ok(Box::new(Day04 {
-        input: BingoInput {
-            boards,
-            number_order,
-        },
-    }))
-}
-
-impl Day for Day04 {
     fn part_1(&self) -> Answer {
         let mut input = self.input.clone();
         for n in input.number_order {
@@ -216,13 +216,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day04::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(4512));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day04::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(1924));
     }
 }

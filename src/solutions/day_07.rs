@@ -4,17 +4,17 @@ pub struct Day07 {
     input: Vec<usize>,
 }
 
-pub fn new(mut input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let parsed: Vec<_> = input
-        .next()
-        .ok_or(AOCError::ParseError)?
-        .split(',')
-        .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s.into())))
-        .collect::<Result<_, _>>()?;
-    Ok(Box::new(Day07 { input: parsed }))
-}
-
 impl Day for Day07 {
+    fn new(mut input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let parsed: Vec<_> = input
+            .next()
+            .ok_or(AOCError::ParseError)?
+            .split(',')
+            .map(|s| s.parse().map_err(|e| AOCError::ParseIntError(e, s.into())))
+            .collect::<Result<_, _>>()?;
+        Ok(Day07 { input: parsed })
+    }
+
     fn part_1(&self) -> Answer {
         let fuel = calculate(&self.input, abs_diff);
         Answer::Integer(fuel)
@@ -55,13 +55,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day07::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(37));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day07::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(168));
     }
 }

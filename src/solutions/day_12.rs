@@ -8,12 +8,12 @@ pub struct Day12 {
     input: Vec<Path>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let parsed = input.map(|line| line.parse()).collect::<Result<_, _>>()?;
-    Ok(Box::new(Day12 { input: parsed }))
-}
-
 impl Day for Day12 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let parsed = input.map(|line| line.parse()).collect::<Result<_, _>>()?;
+        Ok(Day12 { input: parsed })
+    }
+
     fn part_1(&self) -> Answer {
         let adj = generate_adjacency(&self.input);
         do_dfs(adj, |_| false).into()
@@ -24,7 +24,8 @@ impl Day for Day12 {
         do_dfs(adj, |v| {
             !v.iter()
                 .any(|(&c, &x)| matches!(c, Cave::Small(_)) && x > 1)
-        }).into()
+        })
+        .into()
     }
 }
 
@@ -153,13 +154,13 @@ b-end";
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day12::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(10));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day12::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(36));
     }
 }

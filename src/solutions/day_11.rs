@@ -5,26 +5,26 @@ pub struct Day11 {
     input: Array2<Option<Octopus>>,
 }
 
-pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError> {
-    let lines: Vec<_> = input.collect();
-    let num_lines = lines.len();
-    let line_len = lines.get(0).ok_or(AOCError::ParseError)?.len();
-
-    let mut arr = Array2::from_elem((num_lines + 2, line_len + 2), None);
-
-    for (i, line) in lines.iter().enumerate() {
-        for (j, c) in line.chars().take(line_len).enumerate() {
-            let energy = c.to_digit(10).ok_or(AOCError::ParseError)? as usize;
-            arr[[i + 1, j + 1]] = Some(Octopus {
-                energy,
-                flashed: false,
-            });
-        }
-    }
-    Ok(Box::new(Day11 { input: arr }))
-}
-
 impl Day for Day11 {
+    fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
+        let lines: Vec<_> = input.collect();
+        let num_lines = lines.len();
+        let line_len = lines.get(0).ok_or(AOCError::ParseError)?.len();
+
+        let mut arr = Array2::from_elem((num_lines + 2, line_len + 2), None);
+
+        for (i, line) in lines.iter().enumerate() {
+            for (j, c) in line.chars().take(line_len).enumerate() {
+                let energy = c.to_digit(10).ok_or(AOCError::ParseError)? as usize;
+                arr[[i + 1, j + 1]] = Some(Octopus {
+                    energy,
+                    flashed: false,
+                });
+            }
+        }
+        Ok(Day11 { input: arr })
+    }
+
     fn part_1(&self) -> Answer {
         Answer::Integer(simulate(&self.input, EndCondition::Step(100)))
     }
@@ -144,13 +144,13 @@ mod test {
 
     #[test]
     fn part_1() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day11::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(1656));
     }
 
     #[test]
     fn part_2() {
-        let runner = new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        let runner = Day11::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_2(), Answer::Integer(195));
     }
 }

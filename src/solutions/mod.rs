@@ -3,6 +3,22 @@ use std::path::Path;
 
 use crate::prelude::*;
 
+use self::day_01::Day01;
+use self::day_02::Day02;
+use self::day_03::Day03;
+use self::day_04::Day04;
+use self::day_05::Day05;
+use self::day_06::Day06;
+use self::day_07::Day07;
+use self::day_08::Day08;
+use self::day_09::Day09;
+use self::day_10::Day10;
+use self::day_11::Day11;
+use self::day_12::Day12;
+use self::day_13::Day13;
+use self::day_14::Day14;
+use self::day_15::Day15;
+
 mod day_01;
 mod day_02;
 mod day_03;
@@ -44,22 +60,22 @@ pub fn get_runner(
     input_path: impl AsRef<Path>,
 ) -> Result<Box<dyn Day>, AOCError> {
     let input = read_input_lines(input_path)?;
-    let runner = match day {
-        1 => day_01::new(input)?,
-        2 => day_02::new(input)?,
-        3 => day_03::new(input)?,
-        4 => day_04::new(input)?,
-        5 => day_05::new(input)?,
-        6 => day_06::new(input)?,
-        7 => day_07::new(input)?,
-        8 => day_08::new(input)?,
-        9 => day_09::new(input)?,
-        10 => day_10::new(input)?,
-        11 => day_11::new(input)?,
-        12 => day_12::new(input)?,
-        13 => day_13::new(input)?,
-        14 => day_14::new(input)?,
-        15 => day_15::new(input)?,
+    let runner: Box<dyn Day> = match day {
+        1 => Box::new(Day01::new(input)?),
+        2 => Box::new(Day02::new(input)?),
+        3 => Box::new(Day03::new(input)?),
+        4 => Box::new(Day04::new(input)?),
+        5 => Box::new(Day05::new(input)?),
+        6 => Box::new(Day06::new(input)?),
+        7 => Box::new(Day07::new(input)?),
+        8 => Box::new(Day08::new(input)?),
+        9 => Box::new(Day09::new(input)?),
+        10 => Box::new(Day10::new(input)?),
+        11 => Box::new(Day11::new(input)?),
+        12 => Box::new(Day12::new(input)?),
+        13 => Box::new(Day13::new(input)?),
+        14 => Box::new(Day14::new(input)?),
+        15 => Box::new(Day15::new(input)?),
         _ => return Err(AOCError::DayOutOfRange(day)),
     };
     Ok(runner)
