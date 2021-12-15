@@ -12,10 +12,14 @@ pub fn new(input: impl Iterator<Item = String>) -> Result<Box<dyn Day>, AOCError
     let input: Vec<_> = input.collect();
     let rows = input.len();
     let cols = input.get(0).map(|line| line.len()).unwrap_or(0);
-    let mut grid = Array2::zeros((rows, cols));
+    let mut grid = Array2::from_elem((rows, cols), usize::MAX);
     for (i, line) in input.iter().enumerate() {
         for (j, c) in line.chars().take(cols).enumerate() {
-            grid[[i, j]] = c.to_digit(10).unwrap_or(u32::MAX) as usize;
+            grid[[i, j]] = c
+                .to_digit(10)
+                .map(|d| d.try_into().ok())
+                .flatten()
+                .unwrap_or(usize::MAX);
         }
     }
     Ok(Box::new(Day15 { grid }))
