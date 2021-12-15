@@ -15,6 +15,11 @@ ndarray = "0.15"
 rayon = "1.5"
 rustc-hash = "1.1"
 
+[profile.release]
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+
 [lib]
 bench = false
 
