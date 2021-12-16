@@ -54,7 +54,7 @@ fn evaluate(packet: &Packet) -> Option<usize> {
     match packet {
         Packet::Literal { value: v, .. } => Some(*v),
         Packet::Operator {
-            type_id: t,
+            op_type: t,
             subpackets: s,
             ..
         } => match t {
@@ -62,18 +62,9 @@ fn evaluate(packet: &Packet) -> Option<usize> {
             OperatorType::Product => s.iter().map(evaluate).product(),
             OperatorType::Minimum => s.iter().map(evaluate).min().flatten(),
             OperatorType::Maximum => s.iter().map(evaluate).max().flatten(),
-            OperatorType::GreaterThan => match evaluate(s.get(0)?) > evaluate(s.get(1)?) {
-                true => Some(1),
-                false => Some(0),
-            },
-            OperatorType::LessThan => match evaluate(s.get(0)?) < evaluate(s.get(1)?) {
-                true => Some(1),
-                false => Some(0),
-            },
-            OperatorType::EqualTo => match evaluate(s.get(0)?) == evaluate(s.get(1)?) {
-                true => Some(1),
-                false => Some(0),
-            },
+            OperatorType::Greater => Some((evaluate(s.get(0)?) > evaluate(s.get(1)?)) as usize),
+            OperatorType::Less => Some((evaluate(s.get(0)?) < evaluate(s.get(1)?)) as usize),
+            OperatorType::Equal => Some((evaluate(s.get(0)?) == evaluate(s.get(1)?)) as usize),
         },
     }
 }
@@ -90,13 +81,13 @@ fn parse_packet(bits: &BitSlice) -> Option<(Packet, &BitSlice)> {
     if bits.len() < 3 {
         return None;
     }
-    let (type_id_bits, bits) = bits.split_at(3);
-    let type_id = TypeID::from_int(to_int(type_id_bits));
+    let (op_type_bits, bits) = bits.split_at(3);
+    let op_type = TypeID::from_int(to_int(op_type_bits))?;
 
     // Parse packet
-    match type_id {
+    match op_type {
         TypeID::Literal => parse_literal(version, bits),
-        TypeID::Operator(type_id) => parse_operator(version, type_id, bits),
+        TypeID::Operator(op_type) => parse_operator(version, op_type, bits),
     }
 }
 
@@ -122,14 +113,18 @@ fn parse_literal(version: usize, mut bits: &BitSlice) -> Option<(Packet, &BitSli
     Some((Packet::Literal { version, value: n }, bits))
 }
 
-fn parse_operator(version: usize, type_id: usize, bits: &BitSlice) -> Option<(Packet, &BitSlice)> {
+fn parse_operator(
+    version: usize,
+    op_type: OperatorType,
+    bits: &BitSlice,
+) -> Option<(Packet, &BitSlice)> {
     if bits.is_empty() {
         return None;
     }
-    let (length_type_id_bits, mut bits) = bits.split_at(1);
+    let (length_op_type_bits, mut bits) = bits.split_at(1);
 
     let mut subpackets = Vec::new();
-    match length_type_id_bits[0] {
+    match length_op_type_bits[0] {
         true => {
             // Next 11 bits contains number of subpackets
             if bits.len() < 11 {
@@ -177,7 +172,7 @@ fn parse_operator(version: usize, type_id: usize, bits: &BitSlice) -> Option<(Pa
     Some((
         Packet::Operator {
             version,
-            type_id: type_id.try_into().ok()?,
+            op_type,
             subpackets,
         },
         bits,
@@ -204,7 +199,7 @@ enum Packet {
     },
     Operator {
         version: usize,
-        type_id: OperatorType,
+        op_type: OperatorType,
         subpackets: Vec<Packet>,
     },
 }
@@ -212,14 +207,14 @@ enum Packet {
 #[derive(Debug)]
 enum TypeID {
     Literal,
-    Operator(usize),
+    Operator(OperatorType),
 }
 
 impl TypeID {
-    fn from_int(n: usize) -> Self {
+    fn from_int(n: usize) -> Option<Self> {
         match n {
-            4 => Self::Literal,
-            _ => Self::Operator(n),
+            4 => Some(Self::Literal),
+            _ => Some(Self::Operator(n.try_into().ok()?)),
         }
     }
 }
@@ -230,9 +225,9 @@ enum OperatorType {
     Product,
     Minimum,
     Maximum,
-    GreaterThan,
-    LessThan,
-    EqualTo,
+    Greater,
+    Less,
+    Equal,
 }
 
 impl TryFrom<usize> for OperatorType {
@@ -244,9 +239,9 @@ impl TryFrom<usize> for OperatorType {
             1 => Ok(Self::Product),
             2 => Ok(Self::Minimum),
             3 => Ok(Self::Maximum),
-            5 => Ok(Self::GreaterThan),
-            6 => Ok(Self::LessThan),
-            7 => Ok(Self::EqualTo),
+            5 => Ok(Self::Greater),
+            6 => Ok(Self::Less),
+            7 => Ok(Self::Equal),
             _ => Err(AOCError::SolutionError),
         }
     }
