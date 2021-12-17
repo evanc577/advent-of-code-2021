@@ -75,17 +75,17 @@ fn parse_packet(bits: &BitSlice) -> Option<(Packet, &BitSlice)> {
         return None;
     }
     let (version_bits, bits) = bits.split_at(3);
-    let version = to_int(version_bits);
+    let version = version_bits.as_usize();
 
     // Type ID
     if bits.len() < 3 {
         return None;
     }
-    let (op_type_bits, bits) = bits.split_at(3);
-    let op_type = TypeID::from_int(to_int(op_type_bits))?;
+    let (type_id_bits, bits) = bits.split_at(3);
+    let type_id = type_id_bits.into();
 
     // Parse packet
-    match op_type {
+    match type_id {
         TypeID::Literal => parse_literal(version, bits),
         TypeID::Operator(op_type) => parse_operator(version, op_type, bits),
     }
@@ -103,7 +103,7 @@ fn parse_literal(version: usize, mut bits: &BitSlice) -> Option<(Packet, &BitSli
         bits = temp.1;
 
         n <<= 4;
-        n |= to_int(&cur_bits[1..5]);
+        n |= cur_bits[1..5].as_usize();
 
         if !cur_bits[0] {
             break;
@@ -131,7 +131,7 @@ fn parse_operator(
                 return None;
             }
             let temp = bits.split_at(11);
-            let num_subpackets = to_int(temp.0);
+            let num_subpackets = temp.0.as_usize();
             bits = temp.1;
 
             // Parse subpackets
@@ -148,7 +148,7 @@ fn parse_operator(
                 return None;
             }
             let temp = bits.split_at(15);
-            let subpackets_len = to_int(temp.0);
+            let subpackets_len = temp.0.as_usize();
             bits = temp.1;
 
             // Split off subpackets
@@ -179,16 +179,14 @@ fn parse_operator(
     ))
 }
 
-fn to_int(bits: &BitSlice) -> usize {
-    let mut n = 0;
-    for b in bits {
-        n <<= 1;
-        n |= match *b {
-            true => 1,
-            false => 0,
-        };
+trait AsInt {
+    fn as_usize(&self) -> usize;
+}
+
+impl AsInt for BitSlice {
+    fn as_usize(&self) -> usize {
+        self.iter().fold(0, |acc, b| (acc << 1) | *b as usize)
     }
-    n
 }
 
 #[derive(Debug)]
@@ -210,11 +208,18 @@ enum TypeID {
     Operator(OperatorType),
 }
 
-impl TypeID {
-    fn from_int(n: usize) -> Option<Self> {
-        match n {
-            4 => Some(Self::Literal),
-            _ => Some(Self::Operator(n.try_into().ok()?)),
+impl From<&BitSlice> for TypeID {
+    fn from(n: &BitSlice) -> Self {
+        match n[..3].iter().fold(0, |acc, b| (acc << 1) | *b as u8) {
+            0 => Self::Operator(OperatorType::Sum),
+            1 => Self::Operator(OperatorType::Product),
+            2 => Self::Operator(OperatorType::Minimum),
+            3 => Self::Operator(OperatorType::Maximum),
+            4 => Self::Literal,
+            5 => Self::Operator(OperatorType::Greater),
+            6 => Self::Operator(OperatorType::Less),
+            7 => Self::Operator(OperatorType::Equal),
+            _ => unreachable!(),
         }
     }
 }
@@ -228,23 +233,6 @@ enum OperatorType {
     Greater,
     Less,
     Equal,
-}
-
-impl TryFrom<usize> for OperatorType {
-    type Error = AOCError;
-
-    fn try_from(value: usize) -> Result<Self, Self::Error> {
-        match value {
-            0 => Ok(Self::Sum),
-            1 => Ok(Self::Product),
-            2 => Ok(Self::Minimum),
-            3 => Ok(Self::Maximum),
-            5 => Ok(Self::Greater),
-            6 => Ok(Self::Less),
-            7 => Ok(Self::Equal),
-            _ => Err(AOCError::SolutionError),
-        }
-    }
 }
 
 #[cfg(test)]

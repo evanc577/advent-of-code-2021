@@ -38,7 +38,6 @@ pub mod prelude {
         BadInputFile(io::Error),
         ParseError,
         ParseIntError(ParseIntError, String),
-        SolutionError,
     }
 
     impl fmt::Display for AOCError {
@@ -52,7 +51,6 @@ pub mod prelude {
                 Self::ParseIntError(e, s) => {
                     write!(f, "Could not parse integer from string \"{}\": {}", s, e)
                 }
-                Self::SolutionError => write!(f, "Error running solution"),
             }
         }
     }
