@@ -1,4 +1,4 @@
-use std::collections::BinaryHeap;
+// use std::collections::BinaryHeap;
 
 use ndarray::Array2;
 
@@ -68,7 +68,8 @@ fn shortest_path(
 ) -> Option<usize> {
     // Dijkstra's algorithm
     let mut dist = Array2::from_elem(grid.dim(), usize::MAX);
-    let mut heap = BinaryHeap::with_capacity(grid.nrows() * grid.ncols());
+    let mut heap = MinBucketHeap::new();
+    // let mut heap = BinaryHeap::with_capacity(grid.nrows() * grid.ncols());
     let mut next_positions = Vec::with_capacity(4);
 
     dist[start] = 0;
@@ -120,25 +121,82 @@ fn shortest_path(
     None
 }
 
+struct MinBucketHeap<T: IntegerPriority> {
+    data: Vec<Vec<T>>,
+    idx: Option<usize>,
+    size: usize,
+}
+
+impl<T: IntegerPriority> MinBucketHeap<T> {
+    fn new() -> Self {
+        Self {
+            data: Vec::new(),
+            idx: None,
+            size: 0,
+        }
+    }
+
+    fn push(&mut self, t: T) {
+        let priority = t.priority();
+        if priority >= self.data.len() {
+            self.data.resize_with(priority + 1, || Vec::new());
+        }
+        self.data[priority].push(t);
+        self.size += 1;
+        match self.idx {
+            Some(v) => self.idx = Some(v.min(priority)),
+            None => self.idx = Some(priority),
+        }
+    }
+
+    fn pop(&mut self) -> Option<T> {
+        if self.size == 0 {
+            return None;
+        }
+        loop {
+            let i = self.idx.unwrap();
+            if let x @ Some(_) = self.data[i].pop() {
+                self.size -= 1;
+                match self.size {
+                    0 => self.idx = None,
+                    _ => self.idx = Some(i),
+                }
+                return x;
+            }
+            self.idx = Some(i + 1);
+        }
+    }
+}
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 struct State {
     cost: usize,
     position: (usize, usize),
 }
 
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        // Reverse ordering for min heap
-        other
-            .cost
-            .cmp(&self.cost)
-            .then_with(|| self.position.cmp(&other.position))
-    }
+// impl Ord for State {
+    // fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        // // Reverse ordering for min heap
+        // other
+            // .cost
+            // .cmp(&self.cost)
+            // .then_with(|| self.position.cmp(&other.position))
+    // }
+// }
+
+// impl PartialOrd for State {
+    // fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        // Some(self.cmp(other))
+    // }
+// }
+
+trait IntegerPriority {
+    fn priority(&self) -> usize;
 }
 
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.cmp(other))
+impl IntegerPriority for State {
+    fn priority(&self) -> usize {
+        self.cost
     }
 }
 
