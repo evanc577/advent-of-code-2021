@@ -31,9 +31,7 @@ impl Day for Day16 {
 
     fn part_2(&self) -> Answer {
         if let Some((packet, _)) = parse_packet(&self.bits) {
-            if let Some(v) = evaluate(&packet) {
-                return Answer::Integer(v);
-            }
+            return evaluate(&packet).into();
         }
         Answer::None
     }
