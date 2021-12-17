@@ -5,8 +5,7 @@ use regex::Regex;
 use crate::prelude::*;
 
 pub struct Day17 {
-    target_x: (isize, isize),
-    target_y: (isize, isize),
+    target: Target,
 }
 
 impl Day for Day17 {
@@ -29,8 +28,7 @@ impl Day for Day17 {
                 return Err(AOCError::ParseError);
             }
             Ok(Self {
-                target_x: (x1, x2),
-                target_y: (y1, y2),
+                target: Target::new((x1, x2), (y1, y2)),
             })
         } else {
             Err(AOCError::ParseError)
@@ -38,66 +36,104 @@ impl Day for Day17 {
     }
 
     fn part_1(&self) -> Answer {
-        Answer::Integer(max_y(self.target_y))
+        // Answer::Integer(max_y(&self.target))
+        brute_force(&self.target, EndCondition::MaxY).into()
     }
 
     fn part_2(&self) -> Answer {
-        Answer::Integer(num_trajectories(self.target_x, self.target_y))
+        brute_force(&self.target, EndCondition::NumTrajectories).into()
     }
 }
 
-fn max_y(target_y: (isize, isize)) -> usize {
+#[allow(dead_code)]
+fn max_y_naive(target: &Target) -> Option<usize> {
     // Assume that target is below y-axis and if the final y value is on target, then it is always
     // possible to reach to target
-    if target_y.0 < 0 && target_y.1 < 0 {
-        let n = (target_y.0 + 1).abs();
-        return (n * (n + 1) / 2) as usize;
+    if target.y.0 > 0 || target.y.1 > 0 {
+        None
+    } else {
+        let y_velocity = (target.y.0 + 1).abs();
+        let max_y = (y_velocity * (y_velocity + 1) / 2) as usize;
+        Some(max_y)
     }
-    unimplemented!();
 }
 
-fn num_trajectories(target_x: (isize, isize), target_y: (isize, isize)) -> usize {
+fn brute_force(target: &Target, end: EndCondition) -> Option<usize> {
     // Assume that target is below y axis
-    if target_y.0 < 0 && target_y.1 < 0 {
+    if target.y.0 > 0 || target.y.1 > 0 {
+        None
+    } else {
         let mut count = 0;
-        for y_velocity in (target_y.0)..=(-target_y.0) {
-            for x_velocity in target_x.0.min(0)..=target_x.1.max(0) {
-                let mut x = 0;
-                let mut y = 0;
-                let mut dx = x_velocity;
-                let mut dy = y_velocity;
-
-                // Simulate
-                while y >= target_y.0 {
-                    // Update positions / velocities
-                    x += dx;
-                    y += dy;
-                    match dx.cmp(&0) {
-                        Ordering::Greater => dx -= 1,
-                        Ordering::Less => dx += 1,
-                        _ => (),
-                    }
-                    dy -= 1;
-
-                    // Check if hit
-                    if contains(target_x, target_y, (x, y)) {
-                        count += 1;
-                        break;
+        for y_velocity in ((target.y.0)..=(-target.y.0)).rev() {
+            for x_velocity in target.x.0.min(0)..=target.x.1.max(0) {
+                if simulate(target, (x_velocity, y_velocity)) {
+                    match end {
+                        EndCondition::MaxY => {
+                            if y_velocity <= 0 {
+                                return Some(0);
+                            }
+                            let temp = y_velocity as usize;
+                            return Some(temp * (temp + 1) / 2);
+                        }
+                        EndCondition::NumTrajectories => {
+                            count += 1;
+                        }
                     }
                 }
             }
         }
 
-        return count;
+        match end {
+            EndCondition::NumTrajectories => Some(count),
+            EndCondition::MaxY => None,
+        }
     }
-    unimplemented!()
 }
 
-fn contains(target_x: (isize, isize), target_y: (isize, isize), coords: (isize, isize)) -> bool {
-    coords.0 >= target_x.0
-        && coords.0 <= target_x.1
-        && coords.1 >= target_y.0
-        && coords.1 <= target_y.1
+fn simulate(target: &Target, velocity: (isize, isize)) -> bool {
+    let mut x = 0;
+    let mut y = 0;
+    let mut dx = velocity.0;
+    let mut dy = velocity.1;
+
+    while y >= target.y.0 {
+        // Update positions / velocities
+        x += dx;
+        y += dy;
+        match dx.cmp(&0) {
+            Ordering::Greater => dx -= 1,
+            Ordering::Less => dx += 1,
+            _ => (),
+        }
+        dy -= 1;
+
+        // Check if hit
+        if target.hit(x, y) {
+            return true;
+        }
+    }
+
+    false
+}
+
+struct Target {
+    x: (isize, isize),
+    y: (isize, isize),
+}
+
+impl Target {
+    fn new(x: (isize, isize), y: (isize, isize)) -> Self {
+        Self { x, y }
+    }
+
+    fn hit(&self, x: isize, y: isize) -> bool {
+        x >= self.x.0 && x <= self.x.1 && y >= self.y.0 && y <= self.y.1
+    }
+}
+
+enum EndCondition {
+    MaxY,
+    NumTrajectories,
 }
 
 #[cfg(test)]
@@ -110,6 +146,10 @@ mod test {
     fn part_1() {
         let runner = Day17::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
         assert_eq!(runner.part_1(), Answer::Integer(45));
+
+        let input_2 = "target area: x=34..35, y=-8..-6";
+        let runner = Day17::new(input_2.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_1(), Answer::Integer(3));
     }
 
     #[test]
