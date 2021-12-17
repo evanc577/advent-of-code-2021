@@ -63,10 +63,20 @@ fn brute_force(target: &Target, end: EndCondition) -> Option<usize> {
     if target.y.0 > 0 || target.y.1 > 0 {
         None
     } else {
+        let x_target = Target::new(target.x, (isize::MIN, isize::MAX));
+        let x_velocities: Vec<_> = (target.x.0.min(0)..=target.x.1.max(0))
+            .filter(|xv| simulate(&x_target, (*xv, 0), SimulateAxis::X))
+            .collect();
+
+        let y_target = Target::new((isize::MIN, isize::MAX), target.y);
+        let y_velocities = ((target.y.0)..=(-target.y.0))
+            .rev()
+            .filter(|yv| simulate(&y_target, (0, *yv), SimulateAxis::Y));
+
         let mut count = 0;
-        for y_velocity in ((target.y.0)..=(-target.y.0)).rev() {
-            for x_velocity in target.x.0.min(0)..=target.x.1.max(0) {
-                if simulate(target, (x_velocity, y_velocity)) {
+        for y_velocity in y_velocities {
+            for &x_velocity in &x_velocities {
+                if simulate(target, (x_velocity, y_velocity), SimulateAxis::Both) {
                     match end {
                         EndCondition::MaxY => {
                             if y_velocity <= 0 {
@@ -90,16 +100,20 @@ fn brute_force(target: &Target, end: EndCondition) -> Option<usize> {
     }
 }
 
-fn simulate(target: &Target, velocity: (isize, isize)) -> bool {
+fn simulate(target: &Target, velocity: (isize, isize), axis: SimulateAxis) -> bool {
     let mut x = 0;
     let mut y = 0;
     let mut dx = velocity.0;
     let mut dy = velocity.1;
 
-    while y >= target.y.0 {
+    while y >= target.y.0 && !(matches!(axis, SimulateAxis::X) && dx == 0) {
         // Update positions / velocities
-        x += dx;
-        y += dy;
+        if matches!(axis, SimulateAxis::Both | SimulateAxis::X) {
+            x += dx;
+        }
+        if matches!(axis, SimulateAxis::Both | SimulateAxis::Y) {
+            y += dy;
+        }
         match dx.cmp(&0) {
             Ordering::Greater => dx -= 1,
             Ordering::Less => dx += 1,
@@ -114,6 +128,12 @@ fn simulate(target: &Target, velocity: (isize, isize)) -> bool {
     }
 
     false
+}
+
+enum SimulateAxis {
+    Both,
+    X,
+    Y,
 }
 
 struct Target {
