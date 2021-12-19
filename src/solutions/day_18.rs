@@ -1,5 +1,7 @@
 use std::cell::RefCell;
+use std::cmp::Ordering;
 use std::fmt;
+use std::io::Write;
 use std::rc::{Rc, Weak};
 
 use nom::branch::alt;
@@ -48,7 +50,7 @@ fn explode(root: Rc<SnailfishNumber>) -> Option<()> {
                     _ => panic!(),
                 };
 
-                if let Some(left) = find_closest(r.get(0).unwrap().clone(), dir) {
+                if let Some(left) = find_closest(r.get(i).unwrap().clone(), dir) {
                     match &*left.sn_type.borrow() {
                         SnailfishNumberType::Regular(v) => {
                             *v.borrow_mut() += cur;
@@ -121,7 +123,6 @@ enum Direction {
     Right,
 }
 
-#[derive(Debug)]
 struct SnailfishNumber {
     sn_type: RefCell<SnailfishNumberType>,
     parent: RefCell<Weak<SnailfishNumber>>,
@@ -141,6 +142,22 @@ impl fmt::Display for SnailfishNumber {
                 write!(f, "[{},{}]", children.borrow()[0], children.borrow()[1])
             }
         }
+    }
+}
+
+impl fmt::Debug for SnailfishNumber {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self)
+    }
+}
+
+impl PartialEq for SnailfishNumber {
+    fn eq(&self, other: &Self) -> bool {
+        let mut v1 = Vec::new();
+        let mut v2 = Vec::new();
+        write!(v1, "{}", self).unwrap();
+        write!(v2, "{}", other).unwrap();
+        v1.cmp(&v2) == Ordering::Equal
     }
 }
 
@@ -202,12 +219,40 @@ mod test {
 
     #[test]
     fn explode_1() {
-        let input = "[7,[6,[5,[4,[3,2]]]]]";
-        let root = SnailfishNumber::from_str(input).unwrap();
-        dbg!(&root.to_string());
-        explode(root.clone());
-        dbg!(&root.to_string());
-        // panic!()
+        let input_str = "[[[[[9,8],1],2],3],4]";
+        let expected_str = "[[[[0,9],2],3],4]";
+        let num_1 = SnailfishNumber::from_str(input_str).unwrap();
+        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        explode(num_1.clone());
+        assert_eq!(num_1, num_2);
+
+        let input_str = "[7,[6,[5,[4,[3,2]]]]]";
+        let expected_str = "[7,[6,[5,[7,0]]]]";
+        let num_1 = SnailfishNumber::from_str(input_str).unwrap();
+        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        explode(num_1.clone());
+        assert_eq!(num_1, num_2);
+
+        let input_str = "[[6,[5,[4,[3,2]]]],1]";
+        let expected_str = "[[6,[5,[7,0]]],3]";
+        let num_1 = SnailfishNumber::from_str(input_str).unwrap();
+        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        explode(num_1.clone());
+        assert_eq!(num_1, num_2);
+
+        let input_str = "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]";
+        let expected_str = "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]";
+        let num_1 = SnailfishNumber::from_str(input_str).unwrap();
+        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        explode(num_1.clone());
+        assert_eq!(num_1, num_2);
+
+        let input_str = "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]";
+        let expected_str = "[[3,[2,[8,0]]],[9,[5,[7,0]]]]";
+        let num_1 = SnailfishNumber::from_str(input_str).unwrap();
+        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        explode(num_1.clone());
+        assert_eq!(num_1, num_2);
     }
 
     static INPUT: &str = "[[[[1,1],[2,2]],[3,3]],[4,4]]";
