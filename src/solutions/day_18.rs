@@ -4,6 +4,7 @@ use std::fmt;
 use std::io::Write;
 use std::rc::{Rc, Weak};
 
+use itertools::Itertools;
 use nom::branch::alt;
 use nom::character::complete::{char, digit1};
 use nom::combinator::{map, map_res};
@@ -13,23 +14,58 @@ use nom::IResult;
 use crate::prelude::*;
 
 pub struct Day18 {
-    numbers: Vec<Rc<SnailfishNumber>>,
+    input: Vec<String>,
 }
 
 impl Day for Day18 {
     fn new(input: impl Iterator<Item = String>) -> Result<Self, AOCError> {
-        let numbers: Vec<_> = input
-            .map(|line| SnailfishNumber::from_str(&line))
-            .collect::<Result<_, _>>()?;
-        Ok(Self { numbers })
+        let input: Vec<_> = input.collect();
+        Ok(Self { input })
     }
 
     fn part_1(&self) -> Answer {
-        Answer::None
+        let numbers: Result<Vec<_>, _> = self
+            .input
+            .iter()
+            .map(|line| SnailfishNumber::from_str(line))
+            .collect::<Result<_, _>>();
+        let numbers = match numbers {
+            Ok(n) => n,
+            Err(_) => return Answer::None,
+        };
+
+        let sum = match numbers.into_iter().reduce(add) {
+            Some(n) => n,
+            None => return Answer::None,
+        };
+
+        Answer::Integer(sum.magnitude())
     }
 
     fn part_2(&self) -> Answer {
-        Answer::None
+        let numbers: Option<Vec<_>> = self
+            .input
+            .iter()
+            .permutations(2)
+            .map(|v| {
+                let num_1 = SnailfishNumber::from_str(v[0]).ok()?;
+                let num_2 = SnailfishNumber::from_str(v[1]).ok()?;
+                Some((num_1, num_2))
+            })
+            .collect();
+        let numbers = match numbers {
+            Some(n) => n,
+            None => return Answer::None,
+        };
+
+        numbers
+            .into_iter()
+            .map(|(num_1, num_2)| {
+                let num = add(num_1, num_2);
+                num.magnitude()
+            })
+            .max()
+            .into()
     }
 }
 
@@ -52,11 +88,9 @@ fn add(num_1: Rc<SnailfishNumber>, num_2: Rc<SnailfishNumber>) -> Rc<SnailfishNu
 fn reduce(root: Rc<SnailfishNumber>) {
     loop {
         if explode(root.clone()).is_some() {
-            dbg!(root.clone());
             continue;
         }
         if split(root.clone()).is_some() {
-            dbg!(root.clone());
             continue;
         }
         break;
@@ -101,7 +135,7 @@ fn explode(root: Rc<SnailfishNumber>) -> Option<()> {
 // Find first number to explode
 fn find_explode(num: Rc<SnailfishNumber>, depth: usize) -> Option<Rc<SnailfishNumber>> {
     if depth == 5 {
-        return Some(num.parent.borrow().upgrade().unwrap());
+        return num.parent.borrow().upgrade();
     }
 
     match &*num.sn_type.borrow() {
@@ -253,6 +287,16 @@ impl SnailfishNumber {
         }
         Ok(num)
     }
+
+    fn magnitude(&self) -> usize {
+        match &*self.sn_type.borrow() {
+            SnailfishNumberType::Regular(v) => *v.borrow(),
+            SnailfishNumberType::Pair(p) => {
+                let p = p.borrow();
+                3 * p.get(0).unwrap().magnitude() + 2 * p.get(1).unwrap().magnitude()
+            }
+        }
+    }
 }
 
 fn update_parent_ref(num: Rc<SnailfishNumber>) {
@@ -365,17 +409,35 @@ mod test {
         assert_eq!(num, expected);
     }
 
-    static INPUT: &str = "[[[[1,1],[2,2]],[3,3]],[4,4]]";
+    #[test]
+    fn magnitude() {
+        let num = SnailfishNumber::from_str("[9,1]").unwrap();
+        assert_eq!(num.magnitude(), 29);
+
+        let num = SnailfishNumber::from_str("[[[[0,7],4],[[7,8],[6,0]]],[8,1]]").unwrap();
+        assert_eq!(num.magnitude(), 1384);
+    }
+
+    static INPUT: &str = "[[[0,[5,8]],[[1,7],[9,6]]],[[4,[1,2]],[[1,4],2]]]
+[[[5,[2,8]],4],[5,[[9,9],0]]]
+[6,[[[6,2],[5,6]],[[7,6],[4,7]]]]
+[[[6,[0,7]],[0,9]],[4,[9,[9,0]]]]
+[[[7,[6,4]],[3,[1,3]]],[[[5,5],1],9]]
+[[6,[[7,3],[3,2]]],[[[3,8],[5,7]],4]]
+[[[[5,4],[7,7]],8],[[8,3],8]]
+[[9,3],[[9,9],[6,[4,9]]]]
+[[2,[[7,7],7]],[[5,8],[[9,3],[0,2]]]]
+[[[[5,2],5],[8,[3,7]]],[[5,[7,5]],[4,4]]]";
 
     #[test]
     fn part_1() {
         let runner = Day18::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-        assert_eq!(runner.part_1(), Answer::None);
+        assert_eq!(runner.part_1(), Answer::Integer(4140));
     }
 
-    // #[test]
-    // fn part_2() {
-    // let runner = Day18::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
-    // assert_eq!(runner.part_2(), Answer::None);
-    // }
+    #[test]
+    fn part_2() {
+        let runner = Day18::new(INPUT.lines().map(|s| s.to_owned())).unwrap();
+        assert_eq!(runner.part_2(), Answer::Integer(3993));
+    }
 }

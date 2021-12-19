@@ -20,6 +20,7 @@ use self::day_14::Day14;
 use self::day_15::Day15;
 use self::day_16::Day16;
 use self::day_17::Day17;
+use self::day_18::Day18;
 
 mod day_01;
 mod day_02;
@@ -83,6 +84,7 @@ pub fn get_runner(
         15 => Box::new(Day15::new(input)?),
         16 => Box::new(Day16::new(input)?),
         17 => Box::new(Day17::new(input)?),
+        18 => Box::new(Day18::new(input)?),
         _ => return Err(AOCError::DayOutOfRange(day)),
     };
     Ok(runner)
