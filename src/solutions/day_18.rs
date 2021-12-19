@@ -1,7 +1,5 @@
 use std::cell::RefCell;
-use std::cmp::Ordering;
 use std::fmt;
-use std::io::Write;
 use std::rc::{Rc, Weak};
 
 use itertools::Itertools;
@@ -243,7 +241,7 @@ struct SnailfishNumber {
     parent: RefCell<Weak<SnailfishNumber>>,
 }
 
-#[derive(Debug)]
+#[derive(PartialEq, Debug)]
 enum SnailfishNumberType {
     Regular(RefCell<usize>),
     Pair(RefCell<[Rc<SnailfishNumber>; 2]>),
@@ -268,11 +266,7 @@ impl fmt::Debug for SnailfishNumber {
 
 impl PartialEq for SnailfishNumber {
     fn eq(&self, other: &Self) -> bool {
-        let mut v1 = Vec::new();
-        let mut v2 = Vec::new();
-        write!(v1, "{}", self).unwrap();
-        write!(v2, "{}", other).unwrap();
-        v1.cmp(&v2) == Ordering::Equal
+        *self.sn_type.borrow() == *other.sn_type.borrow()
     }
 }
 
