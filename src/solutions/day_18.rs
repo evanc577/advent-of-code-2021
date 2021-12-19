@@ -33,8 +33,38 @@ impl Day for Day18 {
     }
 }
 
+fn add(num_1: Rc<SnailfishNumber>, num_2: Rc<SnailfishNumber>) -> Rc<SnailfishNumber> {
+    let root = Rc::new(SnailfishNumber {
+        sn_type: RefCell::new(SnailfishNumberType::Pair(RefCell::new([
+            num_1.clone(),
+            num_2.clone(),
+        ]))),
+        parent: RefCell::new(Weak::new()),
+    });
+    *num_1.parent.borrow_mut() = Rc::downgrade(&root);
+    *num_2.parent.borrow_mut() = Rc::downgrade(&root);
+
+    reduce(root.clone());
+
+    root
+}
+
+fn reduce(root: Rc<SnailfishNumber>) {
+    loop {
+        if explode(root.clone()).is_some() {
+            dbg!(root.clone());
+            continue;
+        }
+        if split(root.clone()).is_some() {
+            dbg!(root.clone());
+            continue;
+        }
+        break;
+    }
+}
+
 fn explode(root: Rc<SnailfishNumber>) -> Option<()> {
-    // Find leftmost pair nested within four pairs
+    // Find leftmost pair to explode
     let num = find_explode(root, 0)?;
 
     match &*num.sn_type.borrow() {
@@ -59,13 +89,16 @@ fn explode(root: Rc<SnailfishNumber>) -> Option<()> {
                     }
                 }
             }
-
         }
     }
+
+    // Set number to 0
     *num.sn_type.borrow_mut() = SnailfishNumberType::Regular(RefCell::new(0));
+
     Some(())
 }
 
+// Find first number to explode
 fn find_explode(num: Rc<SnailfishNumber>, depth: usize) -> Option<Rc<SnailfishNumber>> {
     if depth == 5 {
         return Some(num.parent.borrow().upgrade().unwrap());
@@ -87,6 +120,7 @@ fn find_explode(num: Rc<SnailfishNumber>, depth: usize) -> Option<Rc<SnailfishNu
     None
 }
 
+// Find closest regular number in a specified direction
 fn find_closest(num: Rc<SnailfishNumber>, dir: Direction) -> Option<Rc<SnailfishNumber>> {
     let parent = num.parent.borrow().upgrade()?;
     let (dir_1, dir_2) = match dir {
@@ -116,6 +150,53 @@ fn find_closest(num: Rc<SnailfishNumber>, dir: Direction) -> Option<Rc<Snailfish
     };
     drop(parent);
     ret
+}
+
+fn split(root: Rc<SnailfishNumber>) -> Option<()> {
+    // Find leftmost pair to split
+    let num = find_split(root)?;
+
+    let (left_v, right_v) = match &*num.sn_type.borrow() {
+        SnailfishNumberType::Pair(_) => unreachable!(),
+        SnailfishNumberType::Regular(v) => {
+            let v = *v.borrow();
+            let left = v / 2;
+            let right = (v + 1) / 2;
+            (left, right)
+        }
+    };
+
+    // Set number to pair
+    let left = SnailfishNumber {
+        sn_type: RefCell::new(SnailfishNumberType::Regular(RefCell::new(left_v))),
+        parent: RefCell::new(Rc::downgrade(&num)),
+    };
+    let right = SnailfishNumber {
+        sn_type: RefCell::new(SnailfishNumberType::Regular(RefCell::new(right_v))),
+        parent: RefCell::new(Rc::downgrade(&num)),
+    };
+    *num.sn_type.borrow_mut() =
+        SnailfishNumberType::Pair(RefCell::new([Rc::new(left), Rc::new(right)]));
+
+    Some(())
+}
+
+// Find first number to split
+fn find_split(num: Rc<SnailfishNumber>) -> Option<Rc<SnailfishNumber>> {
+    match &*num.sn_type.borrow() {
+        SnailfishNumberType::Regular(v) if *v.borrow() >= 10 => Some(num.clone()),
+        SnailfishNumberType::Pair(p) => {
+            let p = p.borrow();
+            if let left @ Some(_) = find_split(p.get(0).unwrap().clone()) {
+                return left;
+            }
+            if let right @ Some(_) = find_split(p.get(1).unwrap().clone()) {
+                return right;
+            }
+            None
+        }
+        _ => None,
+    }
 }
 
 enum Direction {
@@ -222,37 +303,66 @@ mod test {
         let input_str = "[[[[[9,8],1],2],3],4]";
         let expected_str = "[[[[0,9],2],3],4]";
         let num_1 = SnailfishNumber::from_str(input_str).unwrap();
-        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
         explode(num_1.clone());
-        assert_eq!(num_1, num_2);
+        assert_eq!(num_1, expected);
 
         let input_str = "[7,[6,[5,[4,[3,2]]]]]";
         let expected_str = "[7,[6,[5,[7,0]]]]";
         let num_1 = SnailfishNumber::from_str(input_str).unwrap();
-        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
         explode(num_1.clone());
-        assert_eq!(num_1, num_2);
+        assert_eq!(num_1, expected);
 
         let input_str = "[[6,[5,[4,[3,2]]]],1]";
         let expected_str = "[[6,[5,[7,0]]],3]";
         let num_1 = SnailfishNumber::from_str(input_str).unwrap();
-        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
         explode(num_1.clone());
-        assert_eq!(num_1, num_2);
+        assert_eq!(num_1, expected);
 
         let input_str = "[[3,[2,[1,[7,3]]]],[6,[5,[4,[3,2]]]]]";
         let expected_str = "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]";
         let num_1 = SnailfishNumber::from_str(input_str).unwrap();
-        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
         explode(num_1.clone());
-        assert_eq!(num_1, num_2);
+        assert_eq!(num_1, expected);
 
         let input_str = "[[3,[2,[8,0]]],[9,[5,[4,[3,2]]]]]";
         let expected_str = "[[3,[2,[8,0]]],[9,[5,[7,0]]]]";
         let num_1 = SnailfishNumber::from_str(input_str).unwrap();
-        let num_2 = SnailfishNumber::from_str(expected_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
         explode(num_1.clone());
-        assert_eq!(num_1, num_2);
+        assert_eq!(num_1, expected);
+    }
+
+    #[test]
+    fn split_1() {
+        let input_str = "[[[[0,7],4],[15,[0,13]]],[1,1]]";
+        let expected_str = "[[[[0,7],4],[[7,8],[0,13]]],[1,1]]";
+        let num_1 = SnailfishNumber::from_str(input_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
+        split(num_1.clone());
+        assert_eq!(num_1, expected);
+
+        let input_str = "[[[[0,7],4],[[7,8],[0,13]]],[1,1]]";
+        let expected_str = "[[[[0,7],4],[[7,8],[0,[6,7]]]],[1,1]]";
+        let num_1 = SnailfishNumber::from_str(input_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
+        split(num_1.clone());
+        assert_eq!(num_1, expected);
+    }
+
+    #[test]
+    fn add() {
+        let num_1_str = "[[[[4,3],4],4],[7,[[8,4],9]]]";
+        let num_2_str = "[1,1]";
+        let expected_str = "[[[[0,7],4],[[7,8],[6,0]]],[8,1]]";
+        let num_1 = SnailfishNumber::from_str(num_1_str).unwrap();
+        let num_2 = SnailfishNumber::from_str(num_2_str).unwrap();
+        let expected = SnailfishNumber::from_str(expected_str).unwrap();
+        let num = super::add(num_1, num_2);
+        assert_eq!(num, expected);
     }
 
     static INPUT: &str = "[[[[1,1],[2,2]],[3,3]],[4,4]]";
